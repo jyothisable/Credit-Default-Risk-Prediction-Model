@@ -1,0 +1,3 @@
+Description:
+
+Developed a machine learning model to predict loan default risk for a financial services platform. The model was trained on a dataset of borrower attributes, including financial, demographic, and credit-related features. By analyzing these inputs, the model accurately identifies high-risk borrowers, enabling data-driven decisions in the loan underwriting process. The project involved data preprocessing, feature engineering, model selection (e.g., Logistic Regression, Random Forest, XGBoost), and performance evaluation using metrics such as accuracy, precision, recall, and AUC-ROC. The model helps mitigate risk and optimize lending strategies by predicting the likelihood of default before loan approval.
