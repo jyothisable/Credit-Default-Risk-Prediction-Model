@@ -4,7 +4,7 @@ class DataHandler:
     """"
     A class to handle downloading data and loading it into a pandas dataframe along with basic sanity options
     """
-    def __init__(self, file_path : str = 'data/raw', url : str = None, output_path : str = 'data/processed'):
+    def __init__(self, file_path : str = 'data/raw', url : str = None, output_path : str = 'data/processed/'):
         if (url is None and file_path == 'data/raw') or (url is not None and file_path != 'data/raw'):
             raise ValueError('Either url or file_path must/only be specified')
         self.file_path = f"{file_path}"+f"/{url.split('/')[-1]}" if url is not None else file_path # save non default user specified path
@@ -20,9 +20,9 @@ class DataHandler:
         #TODO add csv check
         return pd.read_csv(self.file_path)
     
-    def save_data(self, df : pd.DataFrame) -> None:
+    def save_data(self, df : pd.DataFrame,file_name : str) -> None:
         logging.info(f'Saving data to {self.output_path}')
-        df.to_csv(self.output_path)
+        df.to_csv(self.output_path+file_name, index=False)
         
     def sanitize(self, df : pd.DataFrame) -> pd.DataFrame:
         """
