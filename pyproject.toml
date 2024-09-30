@@ -19,6 +19,7 @@ pytest = "^8.3.3"
 category-encoders = "^2.6.3"
 pyqt5 = "^5.15.11"
 feature-engine = "^1.8.1"
+xgboost = "^2.1.1"
 
 
 [build-system]
