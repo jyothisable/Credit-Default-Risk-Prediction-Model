@@ -3,13 +3,13 @@ import os
 import pandas as pd
 
 # Get the path to the parent directory
-parent_dir = os.path.abspath(os.path.join(os.getcwd(), '..'))
+parent_dir = os.path.abspath(os.path.join(os.getcwd(), '..')) # root dir of project
 
-# Add the parent directory to the system path
+# Add the parent directory to the system path (can import from anywhere)
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
     
-from loantap_credit_default_risk_model.data_processing import DataHandler
+from loantap_credit_default_risk_model.data_handling import DataHandler
 
 # Test Data import
 data_import = DataHandler(file_path='data/raw/logistic_regression.csv')
