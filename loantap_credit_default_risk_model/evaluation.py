@@ -1,7 +1,7 @@
-"""
-This module contains all the functions for evaluating the performance of different pipeline or models.
-It includes functions for evaluating the performance of the model using different metrics, such as accuracy, precision, recall, confusion matrix and AUC-ROC.
-"""
+    """_summary_
+    This module contains all the functions for evaluating the performance of different pipeline or models.
+    It includes functions for evaluating the performance of the model using different metrics, such as accuracy, precision, recall, confusion matrix and AUC-ROC.
+    """
     
 import time
 from sklearn.model_selection import GridSearchCV

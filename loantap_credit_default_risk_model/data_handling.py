@@ -1,6 +1,5 @@
 import pandas as pd
 import logging
-import urllib
 class DataHandler:
     """"
     A class to handle downloading data and loading it into a pandas dataframe along with basic sanity options

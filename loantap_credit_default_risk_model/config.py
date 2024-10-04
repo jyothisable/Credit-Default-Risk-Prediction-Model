@@ -19,7 +19,6 @@ Training constants
 * N_JOBS: The number of jobs to run in parallel
 * RANDOM_SEED: The random seed for reproducibility
 """
-
 # Naming
 FILE_NAME = 'loantap_data.csv'
 # URL = ''
