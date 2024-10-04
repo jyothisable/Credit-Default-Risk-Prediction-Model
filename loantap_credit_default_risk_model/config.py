@@ -1,10 +1,27 @@
-'''
-A module for storing configurations / properties of this project
-'''
+"""_
+This module contains all the constants used in the project. 
+It contains the following constants:
+
+Naming
+* FILE_NAME: The name of the data file
+* URL: The URL of the data file if to be downloaded
+
+Features
+* CAT_ORDINAL_FEATURES : List of categorical features to be used in the ordinal encoder
+* CAT_NOMINAL_FEATURES : List of categorical features to be used in the nominal encoder
+* ORDER_MATRIX: Order matrix for ordinal encoder
+* NUM_FEATURES: List of numerical features
+* NUM_SKEWED_FEATURES: List of skewed numerical features
+* TARGET: The name of the target variable
+* POST_FE_FEATURES: List of features to be post-processed
+
+Training constants
+* N_JOBS: The number of jobs to run in parallel
+* RANDOM_SEED: The random seed for reproducibility
+"""
+# Naming
 FILE_NAME = 'loantap_data.csv'
 # URL = ''
-DATA_PATH = 'data/'
-MODEL_PATH = 'model/'
 
 # Features
 CAT_ORDINAL_FEATURES = ['term', 'grade','sub_grade','emp_length', 'verification_status']
@@ -38,5 +55,4 @@ TARGET = 'loan_status'
 
 # Training configs
 N_JOBS = 8
-
 RANDOM_SEED = 42
