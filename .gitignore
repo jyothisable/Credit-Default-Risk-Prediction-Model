@@ -1,6 +1,7 @@
 poetry.lock
 data/processed/FE.csv
 *__pycache__*
+loantap_credit_default_risk_model/__pycache__
 
 # Boilerplate gitignore from github
 # Byte-compiled / optimized / DLL files
