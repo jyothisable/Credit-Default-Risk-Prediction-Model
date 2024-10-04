@@ -1,3 +1,7 @@
+"""
+This module contains all the Pipelines for feature engineering.
+"""
+
 from sklearn.preprocessing import FunctionTransformer, MinMaxScaler, OneHotEncoder, OrdinalEncoder,KBinsDiscretizer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline, FeatureUnion
@@ -52,11 +56,12 @@ selected_FE = FeatureUnion([
         ('categorical_nominal_pipeline', categorical_nominal_pipeline)
     ])
 
+# Target pipeline for target variable encoding
 target_pipeline = Pipeline([
     ('target_ohe',FunctionTransformer(lambda x : x.map({'Fully Paid':0,'Charged Off':1})))
 ])
 
-
+# Final pipeline
 selected_FE_with_FS = Pipeline([
     ('feature_engineering_pipeline', selected_FE),
     ('feature_selection_pipeline',SelectKBest(k=30,score_func=chi2))
