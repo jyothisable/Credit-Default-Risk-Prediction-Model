@@ -1,7 +1,7 @@
-    """_summary_
-    This module contains all the functions for evaluating the performance of different pipeline or models.
-    It includes functions for evaluating the performance of the model using different metrics, such as accuracy, precision, recall, confusion matrix and AUC-ROC.
-    """
+"""
+This module contains all the functions for evaluating the performance of different pipeline or models.
+It includes functions for evaluating the performance of the model using different metrics, such as accuracy, precision, recall, confusion matrix and AUC-ROC.
+"""
     
 import time
 from sklearn.model_selection import GridSearchCV
@@ -104,6 +104,10 @@ def tune_model_threshold_adjustment(tuned_model, X_train, y_train_transformed, X
     tuned_model = TunedThresholdClassifierCV(tuned_model, cv=3, scoring='f1',store_cv_results=True, n_jobs=N_JOBS)
     tuned_model.fit(X_train,y_train_transformed)
     y_pred=tuned_model.predict(X_test)
+    print('Classification report: Training set')
+    print(classification_report(y_train_transformed, tuned_model.predict(X_train)))
+    
+    print('Classification report: Testing set')
     print(classification_report(y_test_transformed, y_pred))
     print(f'Best threshold = {tuned_model.best_threshold_:.2f} with {scoring} score = {tuned_model.best_score_:.2f}')
     
