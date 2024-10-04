@@ -2,6 +2,7 @@ poetry.lock
 data/processed/FE.csv
 *__pycache__*
 loantap_credit_default_risk_model/__pycache__
+*.pyc
 
 # Boilerplate gitignore from github
 # Byte-compiled / optimized / DLL files
@@ -54,3 +55,6 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+loantap_credit_default_risk_model/__pycache__/config.cpython-312.pyc
+loantap_credit_default_risk_model/__pycache__/pipeline.cpython-312.pyc
