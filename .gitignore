@@ -58,3 +58,5 @@ docs/_build/
 
 loantap_credit_default_risk_model/__pycache__/config.cpython-312.pyc
 loantap_credit_default_risk_model/__pycache__/pipeline.cpython-312.pyc
+loantap_credit_default_risk_model/__pycache__/config.cpython-312.pyc
+loantap_credit_default_risk_model/__pycache__/data_handling.cpython-312.pyc
