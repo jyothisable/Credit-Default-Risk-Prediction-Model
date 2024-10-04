@@ -103,10 +103,10 @@ def tune_model_threshold_adjustment(tuned_model, X_train, y_train_transformed, X
     """
     tuned_model = TunedThresholdClassifierCV(tuned_model, cv=3, scoring='f1',store_cv_results=True, n_jobs=N_JOBS)
     tuned_model.fit(X_train,y_train_transformed)
-    y_pred=tuned_model.predict(X_test)
     print('Classification report: Training set')
     print(classification_report(y_train_transformed, tuned_model.predict(X_train)))
     
+    y_pred=tuned_model.predict(X_test)
     print('Classification report: Testing set')
     print(classification_report(y_test_transformed, y_pred))
     print(f'Best threshold = {tuned_model.best_threshold_:.2f} with {scoring} score = {tuned_model.best_score_:.2f}')
