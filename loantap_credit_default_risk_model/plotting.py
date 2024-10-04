@@ -1,3 +1,7 @@
+"""
+This module contains all the functions for plotting the performance of different pipeline or models.
+"""
+
 import matplotlib.pyplot as plt
 
 def plot_threshold_scoring(model,scoring=''):
