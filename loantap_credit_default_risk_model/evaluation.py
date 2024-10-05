@@ -4,6 +4,7 @@ It includes functions for evaluating the performance of the model using differen
 """
     
 import time
+import logging
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import ExtraTreesClassifier
 # from sklearn.linear_model import LogisticRegression
@@ -41,6 +42,7 @@ def feature_engg_evaluator(x_train, y_train, x_test, y_test, feature_engineering
     best_model : Pipeline
         The best model found by GridSearchCV.
     """
+    logging.info('Starting feature engineering')
 
     params = {  # some simple parameters to grid search
         'base_model__max_depth': [None],
@@ -70,15 +72,16 @@ def feature_engg_evaluator(x_train, y_train, x_test, y_test, feature_engineering
 
     y_pred=best_model.predict(x_test)
     print(classification_report(target_pipeline.transform(y_test), y_pred))
-    
+
     end_time = time.time()
     print(f"Overall took {(end_time - start_time):.2f} seconds")
-    
+
+    logging.info('Feature engineering done')
     return best_model
 
 
 # Post training tuning of selected best model
-def tune_model_threshold_adjustment(tuned_model, X_train, y_train_transformed, X_test, y_test_transformed,scoring='f1'):
+def tune_model_threshold_adjustment(tuned_model, X_train, y_train, X_test, y_test,scoring='f1',target_pipeline=None):
     """
     Perform a grid search on a given model to find the optimal threshold for prediction model (classification).
     
@@ -101,6 +104,9 @@ def tune_model_threshold_adjustment(tuned_model, X_train, y_train_transformed, X
     -------
     The optimized model with the best threshold.
     """
+    logging.info('Starting model tuning')
+    y_train_transformed = target_pipeline.transform(y_train)
+    y_test_transformed = target_pipeline.transform(y_test)
     tuned_model = TunedThresholdClassifierCV(tuned_model, cv=3, scoring='f1',store_cv_results=True, n_jobs=N_JOBS)
     tuned_model.fit(X_train,y_train_transformed)
     print('Classification report: Training set')
@@ -112,5 +118,6 @@ def tune_model_threshold_adjustment(tuned_model, X_train, y_train_transformed, X
     print(f'Best threshold = {tuned_model.best_threshold_:.2f} with {scoring} score = {tuned_model.best_score_:.2f}')
     
     plot_threshold_scoring(tuned_model,scoring)
+    logging.info('Finished model tuning')
     return tuned_model
 
