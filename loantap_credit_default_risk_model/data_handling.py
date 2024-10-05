@@ -1,3 +1,7 @@
+"""
+This module contains all the functions for handling the data like downloading the data, loading the data, saving the data, and sanitizing the data.
+"""
+
 import logging
 import pandas as pd
 import joblib # for saving pipeline
