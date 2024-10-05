@@ -1,8 +1,19 @@
 import logging
+import os
+import sys
+
 from xgboost import XGBClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
+
+# Get the path to the parent directory
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # root dir of project
+
+# Add the parent directory to the system path (can import from anywhere)
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
+print(sys.path)
 
 from loantap_credit_default_risk_model import config, FE_pipeline, data_handling,evaluation
 
@@ -27,7 +38,7 @@ XGB_with_FE_CV = GridSearchCV(
     },
     scoring='f1',
     cv=3,
-    n_jobs=8,
+    n_jobs=config.N_JOBS,
     verbose=True
 )
 
@@ -53,7 +64,7 @@ def perform_training():
     logging.info('Split data into train and test. Then, saved test data to test_data.csv')
 
     # Model training
-    XBG_model = XGB_with_FE_CV.fit(X_train, y_train)
+    XBG_model = XGB_with_FE_CV.fit(X_train, y_train).best_estimator_
     data_handling.save_pipeline(XBG_model, 'XBG_model')
     
     # Post tuning of selected best model (threshold adjustment as per business requirements)

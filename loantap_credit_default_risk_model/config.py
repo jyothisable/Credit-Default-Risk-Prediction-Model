@@ -19,9 +19,11 @@ Training constants
 * N_JOBS: The number of jobs to run in parallel
 * RANDOM_SEED: The random seed for reproducibility
 """
+import os
 # Naming
 FILE_NAME = 'loantap_data.csv'
 URL = ''
+PARENT_ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 # Features
 CAT_ORDINAL_FEATURES = ['term', 'grade','sub_grade','emp_length', 'verification_status']

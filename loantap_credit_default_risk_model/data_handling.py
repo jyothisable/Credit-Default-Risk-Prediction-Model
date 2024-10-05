@@ -45,10 +45,10 @@ def load_data_and_sanitize(file_name : str = config.FILE_NAME) -> pd.DataFrame:
     if file_name.split('.')[1] != 'csv':
         raise ValueError('file_name must be a csv')
     logging.info('Ingesting data from %s', file_name)
-    return pd.read_csv(f'../data/{file_name}').rename(lambda x: x.lower()
-                                                        .strip()
-                                                        .replace(' ', '_'),
-                                                        axis='columns')
+    return pd.read_csv(f'{config.PARENT_ABS_PATH}/data/{file_name}').rename(lambda x: x.lower() # this module is imported in files with CWD as root thus '/data'
+                                                                                        .strip()
+                                                                                        .replace(' ', '_'),
+                                                                            axis='columns')
 
 def save_data(df : pd.DataFrame,file_name : str) -> None:
     """
@@ -59,7 +59,7 @@ def save_data(df : pd.DataFrame,file_name : str) -> None:
         file_name (str): The name of the local csv file to save the DataFrame to.
     """
     logging.info('Saving data to %s', file_name)
-    df.to_csv(f'../data/{file_name}', index=False)
+    df.to_csv(f'{config.PARENT_ABS_PATH}/data/{file_name}', index=False) # this module is imported in files with CWD as root thus '/data'
 
 def save_pipeline(pipeline, pipe_name: str) -> None:
     """
@@ -69,7 +69,7 @@ def save_pipeline(pipeline, pipe_name: str) -> None:
         pipeline (Pipeline): The pipeline to save.
     """
     logging.info('Saving pipeline to trained_models folder')
-    joblib.dump(pipeline, f'trained_models/{pipe_name}.pkl')
+    joblib.dump(pipeline, f'{config.PARENT_ABS_PATH}/loantap_credit_default_risk_model/trained_models/{pipe_name}.pkl')
     print(f'Saved pipeline to trained_models/{pipe_name}.pkl')
     
 
@@ -83,4 +83,4 @@ def load_pipeline(pipe_name: str):
     Returns:
         Pipeline: The loaded pipeline.
     """
-    return joblib.load(f'trained_models/{pipe_name}.pkl')
+    return joblib.load(f'{config.PARENT_ABS_PATH}/loantap_credit_default_risk_model/trained_models/{pipe_name}.pkl')
