@@ -4,7 +4,7 @@ This module contains all the functions for handling the data like downloading th
 
 import logging
 import pandas as pd
-import joblib # for saving pipeline
+import dill  # for saving pipeline
 
 from loantap_credit_default_risk_model import config
 
@@ -69,7 +69,8 @@ def save_pipeline(pipeline, pipe_name: str) -> None:
         pipeline (Pipeline): The pipeline to save.
     """
     logging.info('Saving pipeline to trained_models folder')
-    joblib.dump(pipeline, f'{config.PARENT_ABS_PATH}/loantap_credit_default_risk_model/trained_models/{pipe_name}.pkl')
+    with open(f'{config.PARENT_ABS_PATH}/loantap_credit_default_risk_model/trained_models/{pipe_name}.pkl', 'wb') as f:
+        dill.dump(pipeline, f)
     print(f'Saved pipeline to trained_models/{pipe_name}.pkl')
     
 
@@ -83,4 +84,6 @@ def load_pipeline(pipe_name: str):
     Returns:
         Pipeline: The loaded pipeline.
     """
-    return joblib.load(f'{config.PARENT_ABS_PATH}/loantap_credit_default_risk_model/trained_models/{pipe_name}.pkl')
+    with open(f'{config.PARENT_ABS_PATH}/loantap_credit_default_risk_model/trained_models/{pipe_name}.pkl', 'rb') as f:
+        pipe = dill.load(f)
+    return pipe
