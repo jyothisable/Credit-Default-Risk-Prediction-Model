@@ -4,7 +4,7 @@ This module contains all the functions for plotting the performance of different
 
 import matplotlib.pyplot as plt
 
-def plot_threshold_scoring(model,scoring=''):
+def plot_threshold_scoring(model,scoring : str ='') -> plt.Figure:
     """
     Plot the scoring metric versus decision threshold for a given model.
 
@@ -40,3 +40,4 @@ def plot_threshold_scoring(model,scoring=''):
     ax.set_xlabel("Decision threshold", fontsize=10)
     ax.set_ylabel(f"{scoring} score", fontsize=10)
     ax.set_title(f"{scoring} score vs. Decision threshold -- Cross-validation", fontsize=12)
+    return fig

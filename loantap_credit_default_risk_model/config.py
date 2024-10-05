@@ -21,7 +21,7 @@ Training constants
 """
 # Naming
 FILE_NAME = 'loantap_data.csv'
-# URL = ''
+URL = ''
 
 # Features
 CAT_ORDINAL_FEATURES = ['term', 'grade','sub_grade','emp_length', 'verification_status']
