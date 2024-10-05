@@ -1,3 +1,7 @@
+"""
+It includes functions for training an XGBoost model with feature engineering and saving the pipeline and test data.
+It also includes functions for tuning the model's threshold adjustment.
+"""
 import logging
 import os
 import sys
