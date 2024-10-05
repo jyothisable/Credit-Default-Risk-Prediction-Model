@@ -1,7 +1,7 @@
 """
 This module contains all the Pipelines for feature engineering.
 """
-
+import pandas as pd
 from sklearn.preprocessing import FunctionTransformer, MinMaxScaler, OneHotEncoder, OrdinalEncoder,KBinsDiscretizer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline, FeatureUnion
@@ -23,7 +23,8 @@ numerical_features_pipeline = Pipeline([
 numerical_features_combined_pipeline = Pipeline([
     ('all_numerical',FeatureUnion([
         ('numerical_skewed_pipeline', numerical_skewed_pipeline),
-        ('numerical_features_pipeline', numerical_features_pipeline)
+        ('numerical_features_pipeline', numerical_features_pipeline),
+        ('FE_construction_age_of_credit', FunctionTransformer(lambda X: (X['issue_d'].dt.year - X['earliest_cr_line'].dt.year).to_frame('age_of_credit')))
         ])),
     ('FE_construction_binning', KBinsDiscretizer(n_bins=5,encode='ordinal',strategy='kmeans')),
     ('FE_improvement_scaling',MinMaxScaler())
@@ -38,14 +39,15 @@ categorical_ordinal_pipeline = Pipeline([
 
 
 all_nominal_cat = FeatureUnion([
-            ('select_categorical_nominal_features', FunctionTransformer(lambda X: X[config.CAT_NOMINAL_FEATURES].applymap(lambda x: str(x).strip().lower()))),
+            ('select_categorical_nominal_features', FunctionTransformer(lambda X: X[config.CAT_NOMINAL_FEATURES])),
             ('FE_construction_zipcode', FunctionTransformer(lambda X: X['address'].str.strip().str.slice(-5).to_frame('zipcode'))),
             ('FE_construction_state', FunctionTransformer(lambda X: X['address'].str.strip().str.slice(-8,-6).to_frame('state'))),
-            ('FE_construction_age_of_credit', FunctionTransformer(lambda X: (X['issue_d'].dt.year - X['earliest_cr_line'].dt.year).to_frame('age_of_credit')))
         ])
 
 categorical_nominal_pipeline = Pipeline([
     ('all_nominal_cat',all_nominal_cat),
+    ('Convert_to_DF', FunctionTransformer(pd.DataFrame)), # Convert back to pandas DF
+    ('FE_improvement_clean', FunctionTransformer(lambda X: X.apply(lambda x: x.str.strip().str.lower()))), # collapse whitespace and convert to lowercase
     ('FE_improvement_impute', SimpleImputer(strategy='most_frequent')),
     ('FE_construction_OHE', OneHotEncoder(handle_unknown='infrequent_if_exist',min_frequency=0.01,sparse_output=False))
 ])
