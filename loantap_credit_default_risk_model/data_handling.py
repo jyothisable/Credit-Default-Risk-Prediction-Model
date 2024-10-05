@@ -1,33 +1,82 @@
-import pandas as pd
 import logging
-import urllib
+import pandas as pd
+import joblib # for saving pipeline
 
-class DataHandler:
-    """"
-    A class to handle downloading data and loading it into a pandas dataframe along with basic sanity options
+from loantap_credit_default_risk_model import config
+
+def download_and_load_data(url : str = config.URL,file_name='') -> pd.DataFrame:
     """
-    def __init__(self, file_path : str = 'data/raw', url : str = None, output_path : str = 'data/processed/'):
-        if (url is None and file_path == 'data/raw') or (url is not None and file_path != 'data/raw'):
-            raise ValueError('Either url or file_path must/only be specified')
-        self.file_path = f"{file_path}"+f"/{url.split('/')[-1]}" if url is not None else file_path # save non default user specified path
-        self.url = url
-        self.output_path = output_path
+    Downloads and loads the data from the specified url, saving it to a local csv file.
     
-    def download_data(self) -> None:
-        logging.info(f'Downloading data from {self.url}')
-        urllib.request.urlretrieve(self.url, self.file_path)
+    Args:
+        url (str): The url of the data file to download. Defaults to config.URL.
+        file_name (str): The name of the local csv file to save the data to. Defaults to the name of the file from the url.
+    
+    Returns:
+        pd.DataFrame: The loaded and sanitized data.
+    """
+    if not url:
+        raise ValueError('url must be specified in config.py or passed as an argument')
+    logging.info('Downloading data from %s', url)
 
-    def load_data(self) -> pd.DataFrame:
-        logging.info(f'Ingesting data from {self.file_path}')
-        #TODO add csv check
-        return pd.read_csv(self.file_path)
+    df = pd.read_csv(url).rename(lambda x: x.lower()
+                                        .strip()
+                                        .replace(' ', '_'),
+                                        axis='columns')
+    file_name = file_name or f"/{url.split('/')[-1]}" # fallback to name from url if not specified
+    config.FILE_NAME = file_name
+    save_data(df, file_name)
+    return df
+
+def load_data_and_sanitize(file_name : str = config.FILE_NAME) -> pd.DataFrame:
+    """
+    Loads data from a local csv file and sanitizes it by converting column names to lower snake case.
+
+    Args:
+        file_name (str): The name of the local csv file to load. Defaults to config.FILE_NAME.
+
+    Returns:
+        pd.DataFrame: The loaded and sanitized data.
+    """
+    if file_name.split('.')[1] != 'csv':
+        raise ValueError('file_name must be a csv')
+    logging.info('Ingesting data from %s', file_name)
+    return pd.read_csv(f'../data/{file_name}').rename(lambda x: x.lower()
+                                                        .strip()
+                                                        .replace(' ', '_'),
+                                                        axis='columns')
+
+def save_data(df : pd.DataFrame,file_name : str) -> None:
+    """
+    Saves a pandas DataFrame to a local csv file.
     
-    def save_data(self, df : pd.DataFrame,file_name : str) -> None:
-        logging.info(f'Saving data to {self.output_path}')
-        df.to_csv(self.output_path+file_name, index=False)
-        
-    def sanitize(self, df : pd.DataFrame) -> pd.DataFrame:
-        """
-        Rename columns to snake case and strip whitespace
-        """
-        return df.rename(lambda x: x.lower().strip().replace(' ', '_'),axis='columns')
+    Args:
+        df (pd.DataFrame): The DataFrame to save.
+        file_name (str): The name of the local csv file to save the DataFrame to.
+    """
+    logging.info('Saving data to %s', file_name)
+    df.to_csv(f'../data/{file_name}', index=False)
+
+def save_pipeline(pipeline, pipe_name: str) -> None:
+    """
+    Saves a pipeline to a pickle file.
+    
+    Args:
+        pipeline (Pipeline): The pipeline to save.
+    """
+    logging.info('Saving pipeline to trained_models folder')
+    joblib.dump(pipeline, f'trained_models/{pipe_name}.pkl')
+    print(f'Saved pipeline to trained_models/{pipe_name}.pkl')
+    
+
+def load_pipeline(pipe_name: str):
+    """
+    Loads a saved pipeline from a pickle file.
+
+    Args:
+        pipe_name (str): The name of the pipeline to load.
+
+    Returns:
+        Pipeline: The loaded pipeline.
+    """
+    return joblib.load(f'trained_models/{pipe_name}.pkl')
