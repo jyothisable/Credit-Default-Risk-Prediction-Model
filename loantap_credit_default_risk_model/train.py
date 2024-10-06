@@ -11,6 +11,7 @@ from xgboost import XGBClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
+# from sklearn.compose import TransformedTargetRegressor
 
 # Get the path to the parent directory
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # root dir of project
@@ -60,8 +61,6 @@ def perform_training():
     """
     logging.info('Starting training')
     df = data_handling.load_data_and_sanitize(config.FILE_NAME)
-    df['earliest_cr_line'] = pd.to_datetime(df['earliest_cr_line'])
-    df['issue_d'] = pd.to_datetime(df['issue_d'], format='%b-%Y')
     X = df.drop(config.TARGET, axis=1)
     y = df[config.TARGET]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=config.RANDOM_SEED, stratify= y)
@@ -70,7 +69,7 @@ def perform_training():
     logging.info('Split data into train and test. Then, saved test data to test_data.csv')
 
     # Model training
-    y_train_transformed = FE_pipeline.target_pipeline.transform(y_train)
+    y_train_transformed = FE_pipeline.target_pipeline.fit_transform(y_train)
     XBG_model = XGB_with_FE_CV.fit(X_train, y_train_transformed).best_estimator_
     
     # Post tuning of selected best model (threshold adjustment as per business requirements)
@@ -82,7 +81,11 @@ def perform_training():
                                                scoring=SCORING,
                                                target_pipeline=FE_pipeline.target_pipeline)
     
+    # XGB_model_tuned_target = TransformedTargetRegressor(regressor= XBG_model_tuned, # model will automatically inverse the target preditions to get back original values
+    #                                                     transformer=FE_pipeline.target_pipeline)
+    
     data_handling.save_pipeline(XBG_model_tuned, 'XBG_model')
+    data_handling.save_pipeline(FE_pipeline.target_pipeline, 'target_pipeline_fitted')
     
     logging.info('Model trained and saved pipeline to trained_models folder')
 

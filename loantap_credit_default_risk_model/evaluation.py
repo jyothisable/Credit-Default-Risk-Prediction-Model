@@ -105,7 +105,7 @@ def tune_model_threshold_adjustment(tuned_model, X_train, y_train, X_test, y_tes
     The optimized model with the best threshold.
     """
     logging.info('Starting model tuning')
-    y_train_transformed = target_pipeline.transform(y_train)
+    y_train_transformed = target_pipeline.fit_transform(y_train)
     y_test_transformed = target_pipeline.transform(y_test)
     tuned_model = TunedThresholdClassifierCV(tuned_model, cv=3, scoring='f1',store_cv_results=True, n_jobs=N_JOBS)
     tuned_model.fit(X_train,y_train_transformed)
