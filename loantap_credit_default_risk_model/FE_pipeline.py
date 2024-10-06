@@ -27,8 +27,7 @@ def get_age_of_credit(df):
     df['earliest_cr_line'] = pd.to_datetime(df['earliest_cr_line'])
     df['issue_d'] = pd.to_datetime(df['issue_d'], format='%b-%Y')
     df['age_of_credit']= df['issue_d'].dt.year - df['earliest_cr_line'].dt.year
-    df['age_of_credit_cum'] = df['age_of_credit'].sort_values(ascending=True).cumsum()
-    return df[['age_of_credit','age_of_credit_cum']]
+    return df[['age_of_credit']]
 
 numerical_features_combined_pipeline = Pipeline([
     ('all_numerical',FeatureUnion([
@@ -44,7 +43,8 @@ numerical_features_combined_pipeline = Pipeline([
 categorical_ordinal_pipeline = Pipeline([
     ('select_categorical_ordinal_features', FunctionTransformer(lambda X: X[config.CAT_ORDINAL_FEATURES])),
     ('FE_improvement_impute', SimpleImputer(strategy='most_frequent')),
-    ('FE_construction_ODE', OrdinalEncoder(categories=config.ORDER_MATRIX))
+    ('FE_construction_ODE', OrdinalEncoder(categories=config.ORDER_MATRIX)),
+    # ('FE_improvement_scaling',MinMaxScaler())
 ])
 
 
@@ -56,8 +56,8 @@ all_nominal_cat = FeatureUnion([
 
 categorical_nominal_pipeline = Pipeline([
     ('all_nominal_cat',all_nominal_cat),
-    ('Convert_to_DF', FunctionTransformer(pd.DataFrame)), # Convert back to pandas DF
-    ('FE_improvement_clean', FunctionTransformer(lambda X: X.apply(lambda x: x.str.strip().str.lower()))), # collapse whitespace and convert to lowercase
+    # ('Convert_to_DF', FunctionTransformer(pd.DataFrame)), # Convert back to pandas DF
+    # ('FE_improvement_clean', FunctionTransformer(lambda X: X.apply(lambda x: x.str.strip().str.lower()))), # collapse whitespace and convert to lowercase
     ('FE_improvement_impute', SimpleImputer(strategy='most_frequent')),
     ('FE_construction_OHE', OneHotEncoder(handle_unknown='infrequent_if_exist',min_frequency=0.01,sparse_output=False))
 ])
@@ -69,7 +69,11 @@ selected_FE = FeatureUnion([
     ])
 
 # Target pipeline for target variable encoding
-target_pipeline = LabelEncoder()
+# target_pipeline = LabelEncoder() # Not used because labelencoding encodes in lexicographical order thus making difficult for TunedThresholdClassifierCV tuning (need class 1 as 'Charged Off')
+
+target_pipeline = Pipeline([
+    ('target_ohe',FunctionTransformer(lambda x : x.map({'Fully Paid':0,'Charged Off':1})))
+])
 
 # Final pipeline
 selected_FE_with_FS = Pipeline([
