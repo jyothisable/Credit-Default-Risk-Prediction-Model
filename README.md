@@ -58,6 +58,7 @@ LoanTap-Credit-Default-Risk-Model/
 ┃ ┗ model_prototyping.ipynb - Notebook for EDA, prototyping and testing models
 ┣ tests/ - Directory for unit tests and integration tests
 ┃ ┗ data_tests.py - Script for testing data handling functions
+┃ ┗ test_prediction.py - Script for testing prediction
 ┣ .gitignore - File specifying files to ignore in Git version control
 ┣ README.md - Project README file
 ┗ pyproject.toml - Project project dependencies file using Poetry
@@ -74,7 +75,7 @@ python loantap_credit_default_risk_model/train.py
 To test the model, run the following command in the root directory:
 
 ```bash
-python tests/test.py #TODO: add file path
+python tests/test_prediction.py #TODO: add file path
 ```
 
 To make predictions, run the following command in the root directory:
