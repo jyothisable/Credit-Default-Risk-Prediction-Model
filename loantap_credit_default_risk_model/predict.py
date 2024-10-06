@@ -1,3 +1,6 @@
+"""
+This module contains all the functions for making predictions with an ML model.
+"""
 import logging
 import os
 import sys
@@ -17,7 +20,15 @@ model = data_handling.load_pipeline('XBG_model')
 target_pipeline_fitted = data_handling.load_pipeline('target_pipeline_fitted')
 
 def generate_prediction():
+    """
+    Load the test data, make predictions with the trained model, print the classification report,
+    and return the predictions.
     
+    Returns
+    -------
+    y_pred : array-like
+        The predictions of the test data.
+    """
     logging.info('Starting prediction')
     test_data = data_handling.load_data_and_sanitize('test_data.csv')
     y = test_data[config.TARGET]
