@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "loantap-credit-default-risk-model"
+version = "0.1.0"
+description = ""
+authors = ["jyothisable <athuljyothis18@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.13"
+pandas = "^2.2.2"
+numpy = "<2"
+seaborn = "^0.13.2"
+scikit-learn = "^1.5.1"
+ydata-profiling = "^4.9.0"
+ipykernel = "^6.29.5"
+setuptools = "^74.1.2"
+ipywidgets = "^8.1.5"
+pytest = "^8.3.3"
+category-encoders = "^2.6.3"
+pyqt5 = "^5.15.11"
+feature-engine = "^1.8.1"
+xgboost = "^2.1.1"
+dill = "^0.3.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
