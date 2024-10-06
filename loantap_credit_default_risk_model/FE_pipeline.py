@@ -20,11 +20,21 @@ numerical_features_pipeline = Pipeline([
     ('FE_improvement_impute', SimpleImputer(strategy='mean'))
 ])
 
+def get_age_of_credit(df):
+    """
+    Construct age of credit feature from earliest credit line and issue date.
+    """
+    df['earliest_cr_line'] = pd.to_datetime(df['earliest_cr_line'])
+    df['issue_d'] = pd.to_datetime(df['issue_d'], format='%b-%Y')
+    df['age_of_credit']= df['issue_d'].dt.year - df['earliest_cr_line'].dt.year
+    df['age_of_credit_cum'] = df['age_of_credit'].sort_values(ascending=True).cumsum()
+    return df[['age_of_credit','age_of_credit_cum']]
+
 numerical_features_combined_pipeline = Pipeline([
     ('all_numerical',FeatureUnion([
         ('numerical_skewed_pipeline', numerical_skewed_pipeline),
         ('numerical_features_pipeline', numerical_features_pipeline),
-        ('FE_construction_age_of_credit', FunctionTransformer(lambda X: (X['issue_d'].dt.year - X['earliest_cr_line'].dt.year).to_frame('age_of_credit')))
+        ('FE_construction_age_of_credit', FunctionTransformer(get_age_of_credit))
         ])),
     ('FE_construction_binning', KBinsDiscretizer(n_bins=5,encode='ordinal',strategy='kmeans')),
     ('FE_improvement_scaling',MinMaxScaler())
@@ -39,7 +49,7 @@ categorical_ordinal_pipeline = Pipeline([
 
 
 all_nominal_cat = FeatureUnion([
-            ('select_categorical_nominal_features', FunctionTransformer(lambda X: X[config.CAT_NOMINAL_FEATURES])),
+            ('select_categorical_nominal_features', FunctionTransformer(lambda X: X[config.CAT_NOMINAL_FEATURES].apply(lambda x: x.str.strip().str.lower()))),
             ('FE_construction_zipcode', FunctionTransformer(lambda X: X['address'].str.strip().str.slice(-5).to_frame('zipcode'))),
             ('FE_construction_state', FunctionTransformer(lambda X: X['address'].str.strip().str.slice(-8,-6).to_frame('state'))),
         ])
