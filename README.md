@@ -54,6 +54,7 @@ LoanTap-Credit-Default-Risk-Model/
 ┃ ┗ train.py - Script for training machine learning models
 ┣ notebooks/ - Directory for Jupyter notebooks
 ┃ ┣ loantap_logo.png - Logo image for the project
+┃ ┣ EDA_report.html - HTML report for exploratory data analysis
 ┃ ┗ model_prototyping.ipynb - Notebook for EDA, prototyping and testing models
 ┣ tests/ - Directory for unit tests and integration tests
 ┃ ┗ data_tests.py - Script for testing data handling functions
