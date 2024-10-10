@@ -75,7 +75,7 @@ python loantap_credit_default_risk_model/train.py
 To test the model, run the following command in the root directory:
 
 ```bash
-python tests/test_prediction.py #TODO: add file path
+python tests/test_prediction.py
 ```
 
 To make predictions, run the following command in the root directory:

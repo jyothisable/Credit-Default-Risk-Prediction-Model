@@ -1,0 +1,15 @@
+artifact_uri: file:///home/jyothisable/Resources/Coding/Data%20Science/Scalar%20Projects/LoanTap-Credit-Default-Risk-Model/mlruns/0/da273756420c450da4cd3e9211640e30/artifacts
+end_time: 1728528296902
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: da273756420c450da4cd3e9211640e30
+run_name: gregarious-toad-413
+run_uuid: da273756420c450da4cd3e9211640e30
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1728528249060
+status: 3
+tags: []
+user_id: jyothisable

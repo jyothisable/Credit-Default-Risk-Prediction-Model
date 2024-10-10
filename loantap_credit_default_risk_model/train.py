@@ -6,12 +6,13 @@ import logging
 import os
 import sys
 
-import pandas as pd
 from xgboost import XGBClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
-# from sklearn.compose import TransformedTargetRegressor
+import mlflow
+import mlflow.sklearn
+# import mlflow.xgboost
 
 # Get the path to the parent directory
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # root dir of project
@@ -49,45 +50,38 @@ XGB_with_FE_CV = GridSearchCV(
 
 SCORING = 'f1'
 
-def perform_training():
-    """
-    Train the XGBoost model with feature engineering and save the pipeline and test data
-    
-    This function will load the data, sanitize it, split it into train and test, 
-    perform feature engineering on the train data, and then train an XGBoost model 
-    on the engineered train data. Finally, it will save the trained model in 
-    the '/loantap_credit_default_risk_model/trained_models' directory, and the test 
-    data in the 'data' directory.
-    """
-    logging.info('Starting training')
-    df = data_handling.load_data_and_sanitize(config.FILE_NAME)
-    X = df.drop(config.TARGET, axis=1)
-    y = df[config.TARGET]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=config.RANDOM_SEED, stratify= y)
-    X_test[config.TARGET] = y_test
-    data_handling.save_data(X_test, 'test_data.csv')
-    logging.info('Split data into train and test. Then, saved test data to test_data.csv')
+# Load and split data
+df = data_handling.load_data_and_sanitize(config.FILE_NAME)
+X = df.drop(config.TARGET, axis=1)
+y = df[config.TARGET]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=config.RANDOM_SEED, stratify= y)
+X_test[config.TARGET] = y_test
+data_handling.save_data(X_test, 'test_data.csv')
+logging.info('Split data into train and test. Then, saved test data to test_data.csv')
 
-    # Model training
-    y_train_transformed = FE_pipeline.target_pipeline.fit_transform(y_train)
-    XBG_model = XGB_with_FE_CV.fit(X_train, y_train_transformed).best_estimator_
-    
-    # Post tuning of selected best model (threshold adjustment as per business requirements)
-    XBG_model_tuned = evaluation.tune_model_threshold_adjustment(XBG_model, 
-                                               X_train, 
-                                               y_train, 
-                                               X_test,
-                                               y_test,
-                                               scoring=SCORING,
-                                               target_pipeline=FE_pipeline.target_pipeline)
-    
-    # XGB_model_tuned_target = TransformedTargetRegressor(regressor= XBG_model_tuned, # model will automatically inverse the target preditions to get back original values
-    #                                                     transformer=FE_pipeline.target_pipeline)
-    
-    data_handling.save_pipeline(XBG_model_tuned, 'XBG_model')
-    data_handling.save_pipeline(FE_pipeline.target_pipeline, 'target_pipeline_fitted')
-    
-    logging.info('Model trained and saved pipeline to trained_models folder')
+# mlflow.sklearn.autolog()
+
+def perform_training():
+    with mlflow.start_run():
+        # Model training
+        logging.info('Starting training')
+        y_train_transformed = FE_pipeline.target_pipeline.fit_transform(y_train)
+        # mlflow.log_params(XGB_with_FE_CV.get_params())
+        mlflow.log_params(XGB_with_FE_CV.get_params()['param_grid'])
+        XBG_model = XGB_with_FE_CV.fit(X_train, y_train_transformed).best_estimator_
+        # Post tuning of selected best model (threshold adjustment as per business requirements)
+        XBG_model_tuned,report = evaluation.tune_model_threshold_adjustment(XBG_model,
+                                                X_train,
+                                                y_train,
+                                                X_test,
+                                                y_test,
+                                                scoring=SCORING,
+                                                target_pipeline=FE_pipeline.target_pipeline)
+        mlflow.log_metrics(report['1']) # report is a nested dict for both class metrics => report['1'] gives all metrics for class 1 in dict format which will be logged
+        mlflow.sklearn.log_model(XBG_model_tuned, 'model')
+        data_handling.save_pipeline(XBG_model_tuned, 'XBG_model')
+        data_handling.save_pipeline(FE_pipeline.target_pipeline, 'target_pipeline_fitted')
+        logging.info('Model trained and saved pipeline to trained_models folder')
 
 if __name__ == '__main__':
     perform_training()

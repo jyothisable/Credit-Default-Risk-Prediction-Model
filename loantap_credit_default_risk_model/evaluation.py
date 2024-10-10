@@ -115,9 +115,9 @@ def tune_model_threshold_adjustment(tuned_model, X_train, y_train, X_test, y_tes
     y_pred=tuned_model.predict(X_test)
     print('Classification report: Testing set')
     print(classification_report(y_test_transformed, y_pred))
+    report = classification_report(y_test_transformed, y_pred,output_dict=True) #  take output as dict so that we can log later in MLflow
     print(f'Best threshold = {tuned_model.best_threshold_:.2f} with {scoring} score = {tuned_model.best_score_:.2f}')
-    
     plot_threshold_scoring(tuned_model,scoring)
     logging.info('Finished model tuning')
-    return tuned_model
+    return tuned_model,report
 
