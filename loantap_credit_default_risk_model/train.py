@@ -67,12 +67,12 @@ def objective(trial):
         # Define the pipeline with Feature Engineering and XGBoost
         XGB_with_FE = Pipeline([
             ('feature_engineering_pipeline', FE_pipeline.selected_FE_with_FS),
-            ('base_model', XGBClassifier(**param, use_label_encoder=False))
+            ('base_model', XGBClassifier(**param))
         ])
         # Log hyperparameters in MLflow
         mlflow.log_params(param)
         # Train the model
-        XGB_with_FE.fit(X_train, y_train_transformed)
+        XGB_with_FE.fit(X_train, y_train_transformed) # TODO implement early stopping
         # Predict on the test set
         y_pred = XGB_with_FE.predict(X_test)
         # Calculate the F1 score for class 1 (minority class)
@@ -104,7 +104,7 @@ def perform_training():
         # Train the final model with the best hyperparameters
         XGB_with_FE_best = Pipeline([
             ('feature_engineering_pipeline', FE_pipeline.selected_FE_with_FS),
-            ('base_model', XGBClassifier(**best_params, use_label_encoder=False))
+            ('base_model', XGBClassifier(**best_params))
         ])
         # Log the best hyperparameters in MLflow
         mlflow.log_params(best_params)
@@ -120,6 +120,8 @@ def perform_training():
                                                 target_pipeline=FE_pipeline.target_pipeline)
         mlflow.log_metrics(report['1']) # report is a nested dict for both class metrics => report['1'] gives all metrics for class 1 in dict format which will be logged
         mlflow.log_metric('threshold', XBG_model_tuned.best_threshold_)
+        mlflow.log_artifacts("loantap_credit_default_risk_model/FE_pipeline.py")  # Log the pipeline as an artifact
+        mlflow.log_artifacts("loantap_credit_default_risk_model/config.py")  # Log the config file
         mlflow.sklearn.log_model(XBG_model_tuned, 'model')
 
     data_handling.save_pipeline(XBG_model_tuned, 'XBG_model')
