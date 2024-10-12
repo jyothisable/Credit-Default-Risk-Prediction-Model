@@ -7,12 +7,12 @@ import os
 import sys
 
 from xgboost import XGBClassifier
+import mlflow
+import optuna
 from sklearn.pipeline import Pipeline
+from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
-import mlflow
-import mlflow.sklearn
-# import mlflow.xgboost
 
 # Get the path to the parent directory
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # root dir of project
@@ -22,31 +22,6 @@ if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
 from loantap_credit_default_risk_model import config, FE_pipeline, data_handling,evaluation
-
-# Model and configuration parameters
-XGB_with_FE = Pipeline([
-    ('feature_engineering_pipeline', FE_pipeline.selected_FE_with_FS),
-    ('base_model', XGBClassifier())
-])
-
-XGB_with_FE_CV = GridSearchCV(
-    estimator=XGB_with_FE,
-    param_grid={
-        'base_model__max_depth': [5], 
-        'base_model__learning_rate': [0.15],
-        'base_model__n_estimators': [300], 
-        'base_model__gamma': [0], 
-        'base_model__subsample': [0.95], 
-        'base_model__colsample_bytree': [0.95], 
-        'base_model__lambda': [0.1],
-        'base_model__tree_method': ["hist"],
-        'base_model__eval_metric': ["aucpr"]
-    },
-    scoring='f1',
-    cv=3,
-    n_jobs=config.N_JOBS,
-    verbose=True
-)
 
 SCORING = 'f1'
 
@@ -60,6 +35,50 @@ data_handling.save_data(X_test, 'test_data.csv')
 logging.info('Split data into train and test. Then, saved test data to test_data.csv')
 
 # mlflow.sklearn.autolog()
+
+def objective(trial):
+    # Define the hyperparameters to tune
+    param = {
+        'max_depth': trial.suggest_int('max_depth', 3, 10),
+        'learning_rate': trial.suggest_loguniform('learning_rate', 0.01, 0.3),
+        'n_estimators': trial.suggest_int('n_estimators', 100, 500),
+        'gamma': trial.suggest_loguniform('gamma', 1e-8, 1.0),
+        'subsample': trial.suggest_uniform('subsample', 0.6, 1.0),
+        'colsample_bytree': trial.suggest_uniform('colsample_bytree', 0.6, 1.0),
+        'lambda': trial.suggest_loguniform('lambda', 1e-3, 10.0),
+        'scale_pos_weight': trial.suggest_uniform('scale_pos_weight', 1.0, 4.0),  # Handle class imbalance
+        'tree_method': 'hist',  # Fixed parameter
+        'eval_metric': 'aucpr'  # Fixed parameter
+    }
+    # Define the pipeline with Feature Engineering and XGBoost
+    XGB_with_FE = Pipeline([
+        ('feature_engineering_pipeline', FE_pipeline.selected_FE_with_FS),
+        ('base_model', XGBClassifier(**param, use_label_encoder=False))
+    ])
+    # Start an MLflow run
+    with mlflow.start_run(nested=True):
+        # Log hyperparameters in MLflow
+        mlflow.log_params(param)
+
+        # Transform the target
+        y_train_transformed = FE_pipeline.target_pipeline.fit_transform(y_train)
+
+        # Train the model
+        XGB_with_FE.fit(X_train, y_train_transformed)
+
+        # Predict on the test set
+        y_pred = XGB_with_FE.predict(X_test)
+
+        # Transform predictions back using the target pipeline
+        y_test_transformed = FE_pipeline.target_pipeline.transform(y_test)
+
+        # Calculate the F1 score for class 1 (minority class)
+        f1_class_1 = f1_score(y_test_transformed, y_pred, pos_label=1)
+
+        # Log the F1 score in MLflow
+        mlflow.log_metric('f1_score', f1_class_1)
+
+        return f1_class_1
 
 def perform_training():
     with mlflow.start_run():
@@ -85,3 +104,5 @@ def perform_training():
 
 if __name__ == '__main__':
     perform_training()
+
+# todo add optuna for hyperparameter tuning and logs with mlfow each experiment
