@@ -41,26 +41,26 @@ logging.info('Split data into train and test. Then, saved test data to test_data
 
 def objective(trial):
     logging.info('Starting objective function for optuna trial')
-    # Define the hyperparameters to tune
-    param = {
-        'max_depth': trial.suggest_int('max_depth', 3, 10),
-        'learning_rate': trial.suggest_loguniform('learning_rate', 0.01, 0.3),
-        'n_estimators': trial.suggest_int('n_estimators', 100, 500),
-        'gamma': trial.suggest_loguniform('gamma', 1e-8, 1.0),
-        'subsample': trial.suggest_uniform('subsample', 0.6, 1.0),
-        'colsample_bytree': trial.suggest_uniform('colsample_bytree', 0.6, 1.0),
-        'lambda': trial.suggest_loguniform('lambda', 1e-3, 10.0),
-        'scale_pos_weight': trial.suggest_uniform('scale_pos_weight', 1.0, 4.0),  # Handle class imbalance
-        'tree_method': 'hist',  # Fixed parameter
-        'eval_metric': 'aucpr'  # Fixed parameter
-    }
-    # Define the pipeline with Feature Engineering and XGBoost
-    XGB_with_FE = Pipeline([
-        ('feature_engineering_pipeline', FE_pipeline.selected_FE_with_FS),
-        ('base_model', XGBClassifier(**param, use_label_encoder=False))
-    ])
     # Start an MLflow run
     with mlflow.start_run(nested=True):
+        # Define the hyperparameters to tune
+        param = {
+            'max_depth': trial.suggest_int('max_depth', 3, 10),
+            'learning_rate': trial.suggest_loguniform('learning_rate', 0.01, 0.3),
+            'n_estimators': trial.suggest_int('n_estimators', 100, 500),
+            'gamma': trial.suggest_loguniform('gamma', 1e-8, 1.0),
+            'subsample': trial.suggest_uniform('subsample', 0.6, 1.0),
+            'colsample_bytree': trial.suggest_uniform('colsample_bytree', 0.6, 1.0),
+            'lambda': trial.suggest_loguniform('lambda', 1e-3, 10.0),
+            'scale_pos_weight': trial.suggest_uniform('scale_pos_weight', 1.0, 4.0),  # Handle class imbalance
+            'tree_method': 'hist',  # Fixed parameter
+            'eval_metric': 'aucpr'  # Fixed parameter
+        }
+        # Define the pipeline with Feature Engineering and XGBoost
+        XGB_with_FE = Pipeline([
+            ('feature_engineering_pipeline', FE_pipeline.selected_FE_with_FS),
+            ('base_model', XGBClassifier(**param, use_label_encoder=False))
+        ])
         # Log hyperparameters in MLflow
         mlflow.log_params(param)
         # Train the model
@@ -72,25 +72,27 @@ def objective(trial):
         # Log the F1 score in MLflow
         mlflow.log_metric('f1_score', f1_class_1)
         logging.info('Finished objective function for optuna trial')
-        return f1_class_1
+    return f1_class_1
 
 def perform_training():
     # Model training
     logging.info('Starting training')
-    # Create an Optuna study to maximize the F1 score for class 1
-    study = optuna.create_study(direction='maximize')
-    # Run the optimization with Optuna and log each trial in MLflow
-    study.optimize(objective, n_trials=50)
-    # Get the best hyperparameters
-    best_params = study.best_trial.params
-    # Log the best trial
-    logging.info("Best trial: %s",best_params)
-    # Train the final model with the best hyperparameters
-    XGB_with_FE_best = Pipeline([
-        ('feature_engineering_pipeline', FE_pipeline.selected_FE_with_FS),
-        ('base_model', XGBClassifier(**best_params, use_label_encoder=False))
-    ])
-    with mlflow.start_run():
+    with mlflow.start_run() as parent_run:
+        # Create an Optuna study to maximize the F1 score for class 1
+        study = optuna.create_study(direction='maximize')
+        # Add MLflow callback to Optuna so that MLflow nested runs are logged properly
+        # mlflow_callback = optuna.integration.MLflowCallback(tracking_uri=mlflow.get_tracking_uri())
+        # Run the optimization with Optuna and log each trial in MLflow
+        study.optimize(objective, n_trials=50, show_progress_bar=True,n_jobs=config.N_JOBS)
+        # Get the best hyperparameters
+        best_params = study.best_trial.params
+        # Log the best trial
+        logging.info("Best trial: %s",best_params)
+        # Train the final model with the best hyperparameters
+        XGB_with_FE_best = Pipeline([
+            ('feature_engineering_pipeline', FE_pipeline.selected_FE_with_FS),
+            ('base_model', XGBClassifier(**best_params, use_label_encoder=False))
+        ])
         # Log the best hyperparameters in MLflow
         mlflow.log_params(best_params)
         # Train the model
@@ -106,11 +108,10 @@ def perform_training():
         mlflow.log_metrics(report['1']) # report is a nested dict for both class metrics => report['1'] gives all metrics for class 1 in dict format which will be logged
         mlflow.log_metric('threshold', XBG_model_tuned.best_threshold_)
         mlflow.sklearn.log_model(XBG_model_tuned, 'model')
-        data_handling.save_pipeline(XBG_model_tuned, 'XBG_model')
-        data_handling.save_pipeline(FE_pipeline.target_pipeline, 'target_pipeline_fitted')
-        logging.info('Model trained and saved pipeline to trained_models folder')
+
+    data_handling.save_pipeline(XBG_model_tuned, 'XBG_model')
+    data_handling.save_pipeline(FE_pipeline.target_pipeline, 'target_pipeline_fitted')
+    logging.info('Model trained and saved pipeline to trained_models folder')
 
 if __name__ == '__main__':
     perform_training()
-
-# todo add optuna for hyperparameter tuning and logs with mlfow each experiment
