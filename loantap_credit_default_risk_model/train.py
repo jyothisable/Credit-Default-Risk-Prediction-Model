@@ -55,10 +55,10 @@ def objective(trial):
         param = {
             'max_depth': trial.suggest_int('max_depth', 2, 10),
             'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3,log=True),
-            'n_estimators': trial.suggest_int('n_estimators', 100, 500),
+            'n_estimators': trial.suggest_int('n_estimators', 200, 800),
             'gamma': trial.suggest_float('gamma', 1e-8, 1.0,log=True),
             'subsample': trial.suggest_float('subsample', 0.6, 1.0),
-            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.6, 1.0),
+            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.5, 1.0),
             'lambda': trial.suggest_float('lambda', 1e-3, 10.0,log=True),
             'scale_pos_weight': trial.suggest_float('scale_pos_weight', 1.0, 4.0),  # Handle class imbalance
             'tree_method': 'hist',  # Fixed parameter
@@ -120,8 +120,8 @@ def perform_training():
                                                 target_pipeline=FE_pipeline.target_pipeline)
         mlflow.log_metrics(report['1']) # report is a nested dict for both class metrics => report['1'] gives all metrics for class 1 in dict format which will be logged
         mlflow.log_metric('threshold', XBG_model_tuned.best_threshold_)
-        mlflow.log_artifacts("loantap_credit_default_risk_model/FE_pipeline.py")  # Log the pipeline as an artifact
-        mlflow.log_artifacts("loantap_credit_default_risk_model/config.py")  # Log the config file
+        mlflow.log_artifact("loantap_credit_default_risk_model/FE_pipeline.py")  # Log the pipeline as an artifact
+        mlflow.log_artifact("loantap_credit_default_risk_model/config.py")  # Log the config file
         mlflow.sklearn.log_model(XBG_model_tuned, 'model')
 
     data_handling.save_pipeline(XBG_model_tuned, 'XBG_model')
