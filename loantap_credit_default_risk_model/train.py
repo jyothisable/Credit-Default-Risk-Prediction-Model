@@ -37,15 +37,23 @@ y_train_transformed = FE_pipeline.target_pipeline.fit_transform(y_train)
 y_test_transformed = FE_pipeline.target_pipeline.transform(y_test)
 logging.info('Split data into train and test. Then, saved test data to test_data.csv')
 
-# mlflow.sklearn.autolog()
 
 def objective(trial):
+    """
+    Objective function for optuna tuning.
+
+    This function takes a trial object from optuna and trains an XGBoost model with feature engineering.
+    It logs the hyperparameters and the F1 score for the minority class in MLflow.
+
+    :param trial: optuna trial object
+    :return: F1 score for the minority class
+    """
     logging.info('Starting objective function for optuna trial')
     # Start an MLflow run
     with mlflow.start_run(nested=True):
         # Define the hyperparameters to tune
         param = {
-            'max_depth': trial.suggest_int('max_depth', 3, 10),
+            'max_depth': trial.suggest_int('max_depth', 2, 10),
             'learning_rate': trial.suggest_loguniform('learning_rate', 0.01, 0.3),
             'n_estimators': trial.suggest_int('n_estimators', 100, 500),
             'gamma': trial.suggest_loguniform('gamma', 1e-8, 1.0),
@@ -75,9 +83,12 @@ def objective(trial):
     return f1_class_1
 
 def perform_training():
-    # Model training
+    """
+    Train the model with the best hyperparameters found with Optuna and perform post-tuning threshold adjustment as per business requirements.
+    Save the trained model and the target pipeline to the 'trained_models' folder.
+    """
     logging.info('Starting training')
-    with mlflow.start_run() as parent_run:
+    with mlflow.start_run():
         # Create an Optuna study to maximize the F1 score for class 1
         study = optuna.create_study(direction='maximize')
         # Add MLflow callback to Optuna so that MLflow nested runs are logged properly
