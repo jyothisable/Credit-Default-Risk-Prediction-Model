@@ -50,17 +50,17 @@ def objective(trial):
     """
     logging.info('Starting objective function for optuna trial')
     # Start an MLflow run
-    with mlflow.start_run(nested=True):
+    with mlflow.start_run(nested=True,run_name=f"trial_{trial.number+1}"):
         # Define the hyperparameters to tune
         param = {
             'max_depth': trial.suggest_int('max_depth', 2, 10),
-            'learning_rate': trial.suggest_loguniform('learning_rate', 0.01, 0.3),
+            'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3,log=True),
             'n_estimators': trial.suggest_int('n_estimators', 100, 500),
-            'gamma': trial.suggest_loguniform('gamma', 1e-8, 1.0),
-            'subsample': trial.suggest_uniform('subsample', 0.6, 1.0),
-            'colsample_bytree': trial.suggest_uniform('colsample_bytree', 0.6, 1.0),
-            'lambda': trial.suggest_loguniform('lambda', 1e-3, 10.0),
-            'scale_pos_weight': trial.suggest_uniform('scale_pos_weight', 1.0, 4.0),  # Handle class imbalance
+            'gamma': trial.suggest_float('gamma', 1e-8, 1.0,log=True),
+            'subsample': trial.suggest_float('subsample', 0.6, 1.0),
+            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.6, 1.0),
+            'lambda': trial.suggest_float('lambda', 1e-3, 10.0,log=True),
+            'scale_pos_weight': trial.suggest_float('scale_pos_weight', 1.0, 4.0),  # Handle class imbalance
             'tree_method': 'hist',  # Fixed parameter
             'eval_metric': 'aucpr'  # Fixed parameter
         }
@@ -88,13 +88,15 @@ def perform_training():
     Save the trained model and the target pipeline to the 'trained_models' folder.
     """
     logging.info('Starting training')
-    with mlflow.start_run():
+    mlflow.set_experiment("Model Optuna Optimization")
+    with mlflow.start_run(run_name="Final Optuna Optimized Model"):
+        # Set MLflow tags for final model
+        mlflow.set_tag("model", "XGBClassifier")
+        mlflow.set_tag("objective", "maximize_f1_class_1")
         # Create an Optuna study to maximize the F1 score for class 1
         study = optuna.create_study(direction='maximize')
-        # Add MLflow callback to Optuna so that MLflow nested runs are logged properly
-        # mlflow_callback = optuna.integration.MLflowCallback(tracking_uri=mlflow.get_tracking_uri())
         # Run the optimization with Optuna and log each trial in MLflow
-        study.optimize(objective, n_trials=50, show_progress_bar=True,n_jobs=config.N_JOBS)
+        study.optimize(objective, n_trials=50, show_progress_bar=True)
         # Get the best hyperparameters
         best_params = study.best_trial.params
         # Log the best trial
