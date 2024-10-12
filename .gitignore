@@ -1,7 +1,7 @@
 # Project specific
 poetry.lock
 data/processed/FE.csv
-
+mlruns
 *.pyc
 *.pytest_cache
 
