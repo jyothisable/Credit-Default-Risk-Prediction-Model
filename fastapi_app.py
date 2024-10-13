@@ -44,11 +44,12 @@ def index():
 
 @app.post('/predict')
 async def predict(loan_data: LoanFeatures):
-    # Extract the data from the input
     """
     Predicts whether a loan should be approved or not based on the input data.
     """
-    df = pd.DataFrame(jsonable_encoder(loan_data))
+    # Extract the data from the input
+    data = loan_data.model_dump()
+    df = pd.DataFrame([data])
     pred = model.predict(df)
     if pred[0] == 0:
         return {'Status of Loan Application': 'Approved'}
