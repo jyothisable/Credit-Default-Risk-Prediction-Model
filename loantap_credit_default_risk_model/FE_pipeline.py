@@ -49,15 +49,13 @@ categorical_ordinal_pipeline = Pipeline([
 
 
 all_nominal_cat = FeatureUnion([
-            ('select_categorical_nominal_features', FunctionTransformer(lambda X: X[config.CAT_NOMINAL_FEATURES].apply(lambda x: x.str.strip().str.lower()))),
+            ('select_categorical_nominal_features', FunctionTransformer(lambda X: X[config.CAT_NOMINAL_FEATURES].apply(lambda x: x.str.strip().str.lower()))), # select and clean nominal categorical features
             ('FE_construction_zipcode', FunctionTransformer(lambda X: X['address'].str.strip().str.slice(-5).to_frame('zipcode'))),
             ('FE_construction_state', FunctionTransformer(lambda X: X['address'].str.strip().str.slice(-8,-6).to_frame('state'))),
         ])
 
 categorical_nominal_pipeline = Pipeline([
     ('all_nominal_cat',all_nominal_cat),
-    # ('Convert_to_DF', FunctionTransformer(pd.DataFrame)), # Convert back to pandas DF
-    # ('FE_improvement_clean', FunctionTransformer(lambda X: X.apply(lambda x: x.str.strip().str.lower()))), # collapse whitespace and convert to lowercase
     ('FE_improvement_impute', SimpleImputer(strategy='most_frequent')),
     ('FE_construction_OHE', OneHotEncoder(handle_unknown='infrequent_if_exist',min_frequency=0.01,sparse_output=False))
 ])
