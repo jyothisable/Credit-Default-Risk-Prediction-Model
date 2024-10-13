@@ -5,12 +5,6 @@ from loantap_credit_default_risk_model import data_handling
 
 model = data_handling.load_pipeline('XBG_model')
 
-def prediction(data):
-    df = pd.DataFrame([data])
-    pred = model.predict(df)
-
-    return "Approved" if pred[0] == 0 else "Rejected"
-
 def main():
     st.title("Welcome to Loan Application")
     st.header("Please enter your details to proceed with your loan Application")
@@ -44,44 +38,17 @@ def main():
         'address': st.text_input("Address")
     }
     st.info("Not all fields are used for prediction but they are required for the model to run.")
-    input_field = {
-  "loan_amnt": 20000.0,
-  "term": " 36 months",
-  "int_rate": 12.99,
-  "installment": 673.79,
-  "grade": "C",
-  "sub_grade": "C1",
-  "emp_title": "New Market Analyst",
-  "emp_length": "< 1 year",
-  "home_ownership": "RENT",
-  "annual_inc": 80000.0,
-  "verification_status": "Verified",
-  "issue_d": "Jul-2014",
-  "purpose": "debt_consolidation",
-  "title": "Debt consolidation",
-  "dti": 19.04,
-  "earliest_cr_line": "Sep-2002",
-  "open_acc": 11.0,
-  "pub_rec": 0.0,
-  "revol_bal": 9802.0,
-  "revol_util": 73.7,
-  "total_acc": 37.0,
-  "initial_list_status": "w",
-  "application_type": "INDIVIDUAL",
-  "mort_acc": 1.0,
-  "pub_rec_bankruptcies": 0.0,
-  "address": "970 Cox Causeway Suite 030 East Larry, AZ 11650"
-}
     if st.button("Predict"):
+        # Convert date fields to string format
+        input_fields['issue_d'] = input_fields['issue_d'].strftime("%b-%Y")
+        input_fields['earliest_cr_line'] = input_fields['earliest_cr_line'].strftime("%b-%Y")
+
         result = model.predict(pd.DataFrame([input_fields]))[0]
         if result == 0:
             st.success("Your loan Application is Approved")
         else:
             st.error("Your loan Application is Rejected")
 
-    # show data in a table from input field
-    st.info(input_fields)
-    
     st.sidebar.header("LoanTap Loan status prediction")
     st.sidebar.text("Created by Athul Jyothis")
 
