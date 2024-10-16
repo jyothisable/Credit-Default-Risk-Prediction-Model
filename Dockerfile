@@ -7,11 +7,11 @@ WORKDIR /app
 COPY . .
 
 # install dependencies with poetry
-RUN pip install poetry
-RUN poetry install
+RUN pip install poetry==1.8.3
+RUN poetry install --no-dev
 
 # Expose port
-EXPOSE 5000
+EXPOSE 8000
 
 # Run the app
-CMD ["poetry", "run", "python", "flask_app.py"]
+CMD ["poetry", "run", "python", "fastapi_app.py"]
