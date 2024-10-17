@@ -4,7 +4,7 @@ data/processed/FE.csv
 mlruns*
 *.pyc
 *.pytest_cache
-
+data/loan.csv
 # Boilerplate gitignore from official gitignore
 # Byte-compiled / optimized / DLL files
 __pycache__/
