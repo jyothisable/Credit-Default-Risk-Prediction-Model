@@ -43,7 +43,7 @@ ORDER_MATRIX = [term_order, grade_order, sub_grade_order, emp_length_order, veri
 # CAT_NOMINAL_FEATURES = ['home_ownership','purpose','title','initial_list_status','application_type'] # OHE with 1% threshold to be done
 CAT_NOMINAL_FEATURES2 = ['home_ownership','purpose','title','initial_list_status','application_type','zip_code','addr_state'] # OHE with 1% threshold to be done
 
-NUM_FEATURES = ['loan_amnt','revol_util','lat','lng', 'last_pymnt_amnt','mths_since_last_delinq',
+NUM_FEATURES = ['loan_amnt','revol_util', 'last_pymnt_amnt','mths_since_last_delinq',
                 'mths_since_last_major_derog', 'mths_since_last_record','total_bal_il', 'il_util',
                 'max_bal_bc', 'all_util', 'total_rev_hi_lim','tot_coll_amt','tot_cur_bal']
 
