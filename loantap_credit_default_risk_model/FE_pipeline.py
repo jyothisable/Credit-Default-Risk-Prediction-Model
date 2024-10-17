@@ -43,6 +43,7 @@ class Distance_to_cluster(BaseEstimator, TransformerMixin):
     def get_feature_names_out(self, names=None):
         return [f"Cluster {i} similarity" for i in range(self.n_clusters)]
 
+# Numerical pipelines
 numerical_skewed_pipeline = Pipeline([
     ('select_numerical_skewed_features', FunctionTransformer(lambda X: X[config.NUM_SKEWED_FEATURES2])),
     ('FE_improvement_impute', SimpleImputer(strategy='median'))
@@ -55,12 +56,10 @@ numerical_features_pipeline = Pipeline([
 
 similarity_pipeline = Pipeline([
     ('select_location', FunctionTransformer(lambda X: X[['lat','lng']])),
-    ('distance_to_cluster', Distance_to_cluster()),
-    ('remove_location', FunctionTransformer(lambda X: X.drop(columns=['lat','lng']))),
-    ('FE_improvement_scaling',MinMaxScaler())
+    ('FE_construction_distance_to_cluster', Distance_to_cluster()),
 ])
 
-numerical_features_combined_pipeline = Pipeline([
+all_num_features_pipeline = Pipeline([
     ('all_numerical',FeatureUnion([
         ('numerical_skewed_pipeline', numerical_skewed_pipeline),
         ('numerical_features_pipeline', numerical_features_pipeline),
@@ -71,7 +70,7 @@ numerical_features_combined_pipeline = Pipeline([
     ('FE_improvement_scaling',MinMaxScaler())
 ])
 
-
+# Categorical pipelines
 categorical_ordinal_pipeline_str = Pipeline([
     ('select_categorical_ordinal_features', FunctionTransformer(lambda X: X[config.CAT_ORDINAL_FEATURES_STR])),
     ('FE_improvement_impute', SimpleImputer(strategy='most_frequent')),
@@ -87,20 +86,15 @@ categorical_ordinal_pipeline_int = Pipeline([
     ('FE_improvement_scaling',MinMaxScaler())
 ])
 
-all_nominal_cat = FeatureUnion([
-            ('select_categorical_nominal_features', FunctionTransformer(lambda X: X[config.CAT_NOMINAL_FEATURES2].apply(lambda x: x.str.strip().str.lower()))), # select and clean nominal categorical features
-            # ('FE_construction_zipcode', FunctionTransformer(lambda X: X['address'].str.strip().str.slice(-5).to_frame('zipcode'))),
-            # ('FE_construction_state', FunctionTransformer(lambda X: X['address'].str.strip().str.slice(-8,-6).to_frame('state'))),
-        ])
-
 categorical_nominal_pipeline = Pipeline([
-    ('all_nominal_cat',all_nominal_cat),
+    ('select_categorical_nominal_features', FunctionTransformer(lambda X: X[config.CAT_NOMINAL_FEATURES2].apply(lambda x: x.str.strip().str.lower()))), # select and clean nominal categorical features
     ('FE_improvement_impute', SimpleImputer(strategy='most_frequent')),
     ('FE_construction_OHE', OneHotEncoder(handle_unknown='infrequent_if_exist',min_frequency=0.001,sparse_output=False))
 ])
 
+# Combine all pipelines Numerical + Categorical
 selected_FE = FeatureUnion([
-        ('numerical_combined_pipeline',numerical_features_combined_pipeline),
+        ('numerical_combined_pipeline',all_num_features_pipeline),
         ('categorical_ordinal_pipeline_str', categorical_ordinal_pipeline_str),
         ('categorical_ordinal_pipeline_int', categorical_ordinal_pipeline_int),
         ('categorical_nominal_pipeline', categorical_nominal_pipeline)
@@ -118,5 +112,5 @@ target_pipeline = Pipeline([
 # Final pipeline
 selected_FE_with_FS = Pipeline([
     ('feature_engineering_pipeline', selected_FE),
-    # ('feature_selection_pipeline',SelectKBest(k=40,score_func=mutual_info_classif))
+    ('feature_selection_pipeline',SelectKBest(k=40,score_func=mutual_info_classif))
 ])
