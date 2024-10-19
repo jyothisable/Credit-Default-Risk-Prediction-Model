@@ -21,7 +21,7 @@ Training constants
 """
 import os
 # Naming
-FILE_NAME = 'loantap_data.csv'
+FILE_NAME = 'loan_reduced.csv'
 URL = ''
 PARENT_ABS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -41,7 +41,7 @@ verification_status_order = ['Not Verified', 'Verified', 'Source Verified']
 ORDER_MATRIX = [term_order, grade_order, sub_grade_order, emp_length_order, verification_status_order]
 
 # CAT_NOMINAL_FEATURES = ['home_ownership','purpose','title','initial_list_status','application_type'] # OHE with 1% threshold to be done
-CAT_NOMINAL_FEATURES2 = ['home_ownership','purpose','title','initial_list_status','application_type','zip_code','addr_state'] # OHE with 1% threshold to be done
+CAT_NOMINAL_FEATURES2 = ['home_ownership','purpose','title','initial_list_status','application_type','zip_code','addr_state'] # OHE with 1% threshold to be done # TODO FIX this
 
 NUM_FEATURES = ['loan_amnt','revol_util', 'last_pymnt_amnt','mths_since_last_delinq',
                 'mths_since_last_major_derog', 'mths_since_last_record','total_bal_il', 'il_util',

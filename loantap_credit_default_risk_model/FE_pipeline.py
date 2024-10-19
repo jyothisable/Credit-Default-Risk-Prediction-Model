@@ -20,7 +20,7 @@ def get_age_of_credit(df):
     Construct age of credit feature from earliest credit line and issue date.
     """
     df['earliest_cr_line'] = pd.to_datetime(df['earliest_cr_line'])
-    df['issue_d'] = pd.to_datetime(df['issue_d'], format='%b-%Y')
+    df['issue_d'] = pd.to_datetime(df['issue_d'])
     # missing values imputation for dates
     df['earliest_cr_line'] = df['earliest_cr_line'].ffill()
     df['issue_d'] = df['issue_d'].ffill()
@@ -87,7 +87,7 @@ categorical_ordinal_pipeline_int = Pipeline([
 ])
 
 categorical_nominal_pipeline = Pipeline([
-    ('select_categorical_nominal_features', FunctionTransformer(lambda X: X[config.CAT_NOMINAL_FEATURES2].apply(lambda x: x.str.strip().str.lower()))), # select and clean nominal categorical features
+    ('select_categorical_nominal_features', FunctionTransformer(lambda X: X[config.CAT_NOMINAL_FEATURES2].apply(lambda x: x.astype('str').str.strip().str.lower()))), # select and clean nominal categorical features
     ('FE_improvement_impute', SimpleImputer(strategy='most_frequent')),
     ('FE_construction_OHE', OneHotEncoder(handle_unknown='infrequent_if_exist',min_frequency=0.001,sparse_output=False))
 ])
