@@ -54,9 +54,9 @@ def objective(trial):
         # Define the hyperparameters to tune
         params = {
             # feature Engg params
-            'fe_pipeline__feature_selection_pipeline__k':trial.suggest_int('k', 10, 30),
+            'fe_pipeline__feature_selection_pipeline__k':trial.suggest_int('k', 12, 25),
             'fe_pipeline__feature_engineering_pipeline__categorical_nominal_pipeline__FE_construction_OHE__min_frequency':trial.suggest_float('min_frequency', 0.001, 0.2),
-            'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__n_clusters':trial.suggest_int('n_bins', 7, 15),
+            'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__n_clusters':trial.suggest_int('n_clusters', 7, 15),
             'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__gamma':trial.suggest_float('gamma', 0.1, 1),
             # 'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__strategy':trial.suggest_categorical('strategy', ['uniform', 'quantile', 'kmeans']),
             # 'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__n_bins':trial.suggest_int('n_bins', 3, 10),
@@ -65,9 +65,10 @@ def objective(trial):
             'base_model__criterion': trial.suggest_categorical('criterion', ['gini', 'entropy']),
             'base_model__max_depth': trial.suggest_int('max_depth', 2, 32),
             'base_model__min_samples_split': trial.suggest_int('min_samples_split', 2, 20),
-            'base_model__min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 20),
+            'base_model__min_samples_leaf': trial.suggest_int('min_samples_leaf', 2, 20),
             'base_model__max_features': trial.suggest_categorical('max_features', ['sqrt', 'log2']),
             'base_model__bootstrap': trial.suggest_categorical('bootstrap', [True, False]),
+            'base_model__random_state': config.RANDOM_SEED
         }
         # Define the pipeline with Feature Engineering
         model_with_fe = Pipeline([
@@ -121,7 +122,7 @@ def perform_feature_engineering():
             # feature Engg params
             'fe_pipeline__feature_selection_pipeline__k': best_params['k'],
             'fe_pipeline__feature_engineering_pipeline__categorical_nominal_pipeline__FE_construction_OHE__min_frequency': best_params['min_frequency'],
-            'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__n_clusters': best_params.get('n_clusters',10),
+            'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__n_clusters': best_params['n_clusters'],
             'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__gamma': best_params['gamma'],
             # 'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__strategy': best_params['strategy'],
             # 'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__n_bins': best_params['n_bins'],
