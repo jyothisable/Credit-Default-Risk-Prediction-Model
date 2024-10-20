@@ -54,42 +54,38 @@ def objective(trial):
     # Start an MLflow run
     with mlflow.start_run(nested=True,run_name=f"trial_{trial.number+1}"):
         # Define the hyperparameters to tune
-        fe_params = {
-            'feature_selection_pipeline__k':trial.suggest_int('k', 10, 70),
-            'feature_engineering_pipeline__categorical_nominal_pipeline__FE_construction_OHE__min_frequency':trial.suggest_int('min_frequency', 0.001, 0.1),
-            'feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__n_clusters':trial.suggest_int('n_bins', 7, 15),
-            'feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__gamma':trial.suggest_int('gamma', 0.1, 1),
+        params = {
+            # feature selection params
+            'fe_pipeline__feature_selection_pipeline__k':trial.suggest_int('k', 10, 70),
+            'fe_pipeline__feature_engineering_pipeline__categorical_nominal_pipeline__FE_construction_OHE__min_frequency':trial.suggest_float('min_frequency', 0.001, 0.3),
+            'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__n_clusters':trial.suggest_int('n_bins', 7, 15),
+            'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__gamma':trial.suggest_int('gamma', 0.1, 1),
+            # model params
+            'base_model__n_estimators': trial.suggest_int('n_estimators', 50, 300),
+            'base_model__criterion': trial.suggest_categorical('criterion', ['gini', 'entropy']),
+            'base_model__max_depth': trial.suggest_int('max_depth', 2, 32),
+            'base_model__min_samples_split': trial.suggest_int('min_samples_split', 2, 20),
+            'base_model__min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 20),
+            'base_model__max_features': trial.suggest_categorical('max_features', ['sqrt', 'log2']),
+            'base_model__bootstrap': trial.suggest_categorical('bootstrap', [True, False]),
         }
-        
-        use_kbin_num =trial.suggest_categorical('use_kbin_num', [True, False])
-        
+        # Passthough logic for kbins
+        use_kbin_num =trial.suggest_categorical('use_kbin_num', [True, False]) # this is not stored in params as it is a passthrough and not used for logging explicitly
         if use_kbin_num:
             fe_kbin_params = {
-                'feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__strategy':trial.suggest_categorical('strategy', ['uniform', 'quantile', 'kmeans']),
-                'feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__n_bins':trial.suggest_int('n_bins', 3, 10),
+                'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__strategy':trial.suggest_categorical('strategy', ['uniform', 'quantile', 'kmeans']),
+                'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__n_bins':trial.suggest_int('n_bins', 3, 10),
             }
-            fe_params.update(fe_kbin_params)
-        
-        params = {
-        'n_estimators': trial.suggest_int('n_estimators', 50, 300),
-        'criterion': trial.suggest_categorical('criterion', ['gini', 'entropy', 'log_loss']),
-        'max_depth': trial.suggest_int('max_depth', 2, 32, log=True),
-        'min_samples_split': trial.suggest_int('min_samples_split', 2, 20),
-        'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 20),
-        'min_weight_fraction_leaf': trial.suggest_float('min_weight_fraction_leaf', 0.0, 0.5),
-        'max_features': trial.suggest_categorical('max_features', ['auto', 'sqrt', 'log2', None]),
-        'bootstrap': trial.suggest_categorical('bootstrap', [True, False]),
-        'random_state': config.RANDOM_SEED,  # Fixed for reproducibility
-        'n_jobs': config.N_JOBS,  # Use all available cores
-        }
-    
+            params.update(fe_kbin_params)
+        # Define the pipeline with Feature Engineering
         model_with_fe = Pipeline([
             ('fe_pipeline', FE_pipeline.selected_FE_with_FS),
-            ('base_model', ExtraTreesClassifier(**params)) # this evaluates the FE pipeline
+            ('base_model', ExtraTreesClassifier()) # this evaluates the FE pipeline
         ])
-    
+        # Set the hyperparameters (both model and FE pipeline)
+        model_with_fe.set_params(**params)
         # Log hyperparameters in MLflow
-        mlflow.log_params(fe_params.update(params))
+        mlflow.log_params(params)
         # Train the model
         model_with_fe.fit(X_train, y_train_transformed) # TODO implement early stopping
         # Predict on the test set
@@ -110,27 +106,29 @@ def perform_training():
     mlflow.set_experiment("Feature Engineering Optuna Optimization")
     with mlflow.start_run(run_name="Final Optuna Optimized Model"):
         # Set MLflow tags for final model
-        mlflow.set_tag("model", "XGBClassifier")
+        mlflow.set_tag("FE_engg", "EXTRA")
         mlflow.set_tag("objective", "maximize_f1_class_1")
         # Create an Optuna study to maximize the F1 score for class 1
         study = optuna.create_study(direction='maximize')
         # Run the optimization with Optuna and log each trial in MLflow
-        study.optimize(objective, n_trials=50, show_progress_bar=True)
+        study.optimize(objective, n_trials=200, show_progress_bar=True)
         # Get the best hyperparameters
         best_params = study.best_trial.params
         # Log the best trial
         logging.info("Best trial: %s",best_params)
-        # Train the final model with the best hyperparameters
-        XGB_with_FE_best = Pipeline([
-            ('feature_engineering_pipeline', FE_pipeline.selected_FE_with_FS),
-            ('base_model', XGBClassifier(**best_params))
+        # Define the pipeline with Feature Engineering
+        model_with_fe = Pipeline([
+            ('fe_pipeline', FE_pipeline.selected_FE_with_FS),
+            ('base_model', ExtraTreesClassifier()) # this evaluates the FE pipeline
         ])
+        # Set the hyperparameters (both model and FE pipeline)
+        model_with_fe.set_params(**best_params)
         # Log the best hyperparameters in MLflow
         mlflow.log_params(best_params)
         # Train the model
-        XBG_model = XGB_with_FE_best.fit(X_train, y_train_transformed)
+        eval_model = model_with_fe.fit(X_train, y_train_transformed)
         # Post tuning of selected best model (threshold adjustment as per business requirements)
-        XBG_model_tuned,report = evaluation.tune_model_threshold_adjustment(XBG_model,
+        eval_model_tuned,report = evaluation.tune_model_threshold_adjustment(eval_model,
                                                 X_train,
                                                 y_train,
                                                 X_test,
@@ -138,12 +136,14 @@ def perform_training():
                                                 scoring=SCORING,
                                                 target_pipeline=FE_pipeline.target_pipeline)
         mlflow.log_metrics(report['1']) # report is a nested dict for both class metrics => report['1'] gives all metrics for class 1 in dict format which will be logged
-        mlflow.log_metric('threshold', XBG_model_tuned.best_threshold_)
+        mlflow.log_metric('threshold', eval_model_tuned.best_threshold_)
         mlflow.log_artifact("loantap_credit_default_risk_model/FE_pipeline.py")  # Log the pipeline as an artifact
         mlflow.log_artifact("loantap_credit_default_risk_model/config.py")  # Log the config file
-        mlflow.sklearn.log_model(XBG_model_tuned, 'model')
+        mlflow.sklearn.log_model(eval_model_tuned, 'eval_model')
+        mlflow.sklearn.log_model(eval_model.named_steps['fe_pipeline'], 'fe_pipeline_fitted')
 
-    data_handling.save_pipeline(XBG_model_tuned, 'XBG_model')
+    data_handling.save_pipeline(eval_model_tuned, 'fe_eval_model')
+    data_handling.save_pipeline(eval_model.named_steps['fe_pipeline'], 'fe_pipeline_fitted') # Save best fe pipeline for actual model training in train.py
     data_handling.save_pipeline(FE_pipeline.target_pipeline, 'target_pipeline_fitted')
     logging.info('Model trained and saved pipeline to trained_models folder')
 
