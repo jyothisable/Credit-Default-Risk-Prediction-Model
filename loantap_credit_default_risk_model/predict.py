@@ -4,6 +4,7 @@ This module contains all the functions for making predictions with an ML model.
 import logging
 import os
 import sys
+import pandas as pd
 
 from sklearn.metrics import classification_report
 
@@ -16,6 +17,7 @@ if parent_dir not in sys.path:
     
 from loantap_credit_default_risk_model import config, data_handling
 
+fe_pipe = data_handling.load_pipeline('fe_pipeline_fitted')
 model = data_handling.load_pipeline('XBG_model')
 target_pipeline_fitted = data_handling.load_pipeline('target_pipeline_fitted')
 
@@ -33,9 +35,10 @@ def generate_prediction():
     test_data = data_handling.load_data_and_sanitize('test_data.csv')
     y = test_data[config.TARGET]
     X = test_data.drop(config.TARGET,errors='ignore')
-    y_pred_transformed = model.predict(X)
+    y_pred_transformed = model.predict(fe_pipe.transform(X)) # do FE and then predict
     logging.info('Finished prediction')
-    y_pred = target_pipeline_fitted.inverse_transform(y_pred_transformed)
+    print(y_pred_transformed)
+    y_pred = pd.Series(y_pred_transformed).map({0:'non defaulter',1:'defaulter'})
     print(classification_report(y, y_pred))
     return y_pred
 

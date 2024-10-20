@@ -105,7 +105,7 @@ selected_FE = FeatureUnion([
 
 target_pipeline = Pipeline([
     ('target_ohe',FunctionTransformer(lambda x : x.map({'non defaulter':0,'defaulter':1}),
-                                      inverse_func=lambda x : x.map({0:'non defaulter',1:'defaulter'}),
+                                      inverse_func=lambda x : pd.Series(x).map({0:'non defaulter',1:'defaulter'}),
                                       check_inverse=False))
 ])
 
