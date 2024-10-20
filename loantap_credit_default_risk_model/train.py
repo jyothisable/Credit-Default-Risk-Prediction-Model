@@ -50,22 +50,22 @@ def objective(trial):
     with mlflow.start_run(nested=True,run_name=f"trial_{trial.number+1}"):
         # Define the hyperparameters to tune
         params = {
-            'max_depth': trial.suggest_int('max_depth', 2, 15),
-            'learning_rate': trial.suggest_float('learning_rate', 0.001, 0.3, log=True),
+            'max_depth': trial.suggest_int('max_depth', 2, 10),
+            'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3, log=True),
             'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
-            'gamma': trial.suggest_float('gamma', 1e-8, 1.0, log=True),
+            'gamma': trial.suggest_float('gamma', 0.001, 1.0, log=True),
             'subsample': trial.suggest_float('subsample', 0.5, 1.0),
-            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.4, 1.0),
-            'lambda': trial.suggest_float('lambda', 1e-5, 10.0, log=True),
-            'alpha': trial.suggest_float('alpha', 1e-5, 10.0, log=True),
+            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.5, 1.0),
+            'lambda': trial.suggest_float('lambda', 0.001, 10.0, log=True),
+            'alpha': trial.suggest_float('alpha', 0.001, 10.0, log=True),
             'tree_method': 'hist',  # Fixed parameter for faster training and better handling of large datasets
             'eval_metric': 'aucpr',  # Fixed parameter
             'scale_pos_weight': trial.suggest_float('scale_pos_weight', 1.0, 10.0),
             'min_child_weight': trial.suggest_int('min_child_weight', 1, 10),
             'grow_policy': trial.suggest_categorical('grow_policy', ['depthwise', 'lossguide']),
             # 'early_stopping_rounds': 100,  # Fixed parameter, but can also be tuned
-            'max_delta_step': trial.suggest_int('max_delta_step', 0, 10),
-            'max_leaves': trial.suggest_int('max_leaves', 0, 64),
+            # 'max_delta_step': trial.suggest_int('max_delta_step', 0, 10),
+            # 'max_leaves': trial.suggest_int('max_leaves', 0, 64),
         }
         # Define the pipeline with Feature Engineering and XGBoost
         XGB_with_FE = XGBClassifier(**params)

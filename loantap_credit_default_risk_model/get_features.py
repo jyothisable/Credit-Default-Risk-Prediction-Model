@@ -90,7 +90,7 @@ def objective(trial):
         logging.info('Finished objective function for optuna trial')
     return f1_class_1
 
-def perform_feature_engineering():
+def perform_feature_engineering(n_trials=50):
     """
     Perform feature engineering optimization using Optuna.
     
@@ -107,7 +107,7 @@ def perform_feature_engineering():
         # Create an Optuna study to maximize the F1 score for class 1
         study = optuna.create_study(direction='maximize')
         # Run the optimization with Optuna and log each trial in MLflow
-        study.optimize(objective, n_trials=300, show_progress_bar=True)
+        study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
         # Get the best hyperparameters
         best_params = study.best_trial.params
         # Log the best trial
@@ -159,10 +159,11 @@ def perform_feature_engineering():
         mlflow.sklearn.log_model(eval_model_tuned, 'eval_model')
         mlflow.sklearn.log_model(eval_model.named_steps['fe_pipeline'], 'fe_pipeline_fitted')
 
-    data_handling.save_pipeline(eval_model_tuned, 'fe_eval_model')
+    data_handling.save_pipeline(eval_model, 'fe_eval_model')
+    data_handling.save_pipeline(eval_model_tuned, 'fe_eval_tuned_model')
     data_handling.save_pipeline(eval_model.named_steps['fe_pipeline'], 'fe_pipeline_fitted') # Save best fe pipeline for actual model training in train.py
     data_handling.save_pipeline(FE_pipeline.target_pipeline, 'target_pipeline_fitted')
     logging.info('Model trained and saved pipeline to trained_models folder')
 
 if __name__ == '__main__':
-    perform_feature_engineering()
+    perform_feature_engineering(n_trials=300)
