@@ -17,6 +17,7 @@ from loantap_credit_default_risk_model import config,data_handling
 
 #Fixtures --> functions before test function --> ensure single_prediction
 model = data_handling.load_pipeline('XBG_model')
+fe_pipe = data_handling.load_pipeline('fe_pipeline_fitted')
 
 @pytest.fixture
 def single_prediction():
@@ -25,7 +26,7 @@ def single_prediction():
     """
     test_data = data_handling.load_data_and_sanitize('test_data.csv')
     X,y = test_data.drop(config.TARGET,errors='ignore'),test_data[config.TARGET]
-    pred = model.predict(X)
+    pred = model.predict(fe_pipe.transform(X)) # do FE and then predict on test data (X)
     return pred
 
 def test_single_pred_not_none(single_prediction): # output is not none
