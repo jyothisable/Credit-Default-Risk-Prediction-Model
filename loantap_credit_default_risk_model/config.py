@@ -50,16 +50,7 @@ NUM_FEATURES = ['loan_amnt','revol_util', 'last_pymnt_amnt','mths_since_last_del
 # NUM_SKEWED_FEATURES = ['annual_inc','dti','open_acc', 'pub_rec','revol_bal', 'total_acc', 'mort_acc','pub_rec_bankruptcies']
 NUM_SKEWED_FEATURES2 = ['annual_inc','dti','revol_bal']
 
-POST_FE_FEATURES = ['annual_inc', 'dti', 'open_acc', 'mort_acc', 'loan_amnt', 'revol_util',
-       'term', 'grade', 'sub_grade', 'verification_status',
-       'home_ownership_mortgage', 'home_ownership_rent', 'purpose_car',
-       'purpose_credit_card', 'purpose_debt_consolidation',
-       'purpose_home_improvement', 'purpose_major_purchase',
-       'purpose_small_business', 'title_consolidation',
-       'title_debt consolidation', 'title_other', 'title_infrequent_sklearn',
-       'zipcode_00813', 'zipcode_05113', 'zipcode_11650', 'zipcode_29597',
-       'zipcode_86630', 'zipcode_93700', 'age_of_credit_4',
-       'age_of_credit_10']
+POST_FE_FEATURES = ''
 
 TARGET = 'loan_status'
 
