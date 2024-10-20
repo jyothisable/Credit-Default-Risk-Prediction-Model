@@ -112,7 +112,7 @@ def perform_feature_engineering():
         # Log the best trial
         logging.info("Best trial: %s",best_params)
         # Define the pipeline with Feature Engineering
-        model_with_fe = Pipeline([
+        eval_model = Pipeline([
             ('fe_pipeline', FE_pipeline.selected_FE_with_FS),
             ('base_model', ExtraTreesClassifier()) # this evaluates the FE pipeline
         ])
@@ -135,11 +135,14 @@ def perform_feature_engineering():
             'base_model__bootstrap': best_params['bootstrap'],
         }
         # Set the hyperparameters (both model and FE pipeline)
-        model_with_fe.set_params(**params)
+        eval_model.set_params(**params)
         # Log the best hyperparameters in MLflow
         mlflow.log_params(params)
         # Train the model
-        eval_model = model_with_fe.fit(X_train, y_train_transformed)
+        eval_model[:-1].set_output(transform='pandas')
+        eval_model.fit(X_train, y_train_transformed)
+        # Save features names (hack to save without using .get_feature_names_out() beacause FuncTransformer used)
+        mlflow.log_text(str(eval_model[:-1].transform(X_train).columns), 'feature_names.txt')
         # Post tuning of selected best model (threshold adjustment as per business requirements)
         eval_model_tuned,report = evaluation.tune_model_threshold_adjustment(eval_model,
                                                 X_train,
