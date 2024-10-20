@@ -66,7 +66,7 @@ all_num_features_pipeline = Pipeline([
         ('FE_construction_age_of_credit', FunctionTransformer(get_age_of_credit)),
         ('FE_construction_similarity', similarity_pipeline)        
     ])),
-    ('FE_construction_binning', KBinsDiscretizer(n_bins=5,encode='ordinal',strategy='kmeans')),
+    # ('FE_construction_binning', KBinsDiscretizer(encode='ordinal')),
     ('FE_improvement_scaling',MinMaxScaler())
 ])
 
@@ -112,5 +112,5 @@ target_pipeline = Pipeline([
 # Final pipeline
 selected_FE_with_FS = Pipeline([
     ('feature_engineering_pipeline', selected_FE),
-    ('feature_selection_pipeline',SelectKBest(k=40,score_func=mutual_info_classif))
+    ('feature_selection_pipeline',SelectKBest(score_func=mutual_info_classif))
 ])

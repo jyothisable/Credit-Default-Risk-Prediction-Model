@@ -1,4 +1,3 @@
-# TODO feature engg with optuna and mlflows
 """
 It includes functions for training an XGBoost model with feature engineering and saving the pipeline and test data.
 It also includes functions for tuning the model's threshold adjustment.
@@ -52,11 +51,13 @@ def objective(trial):
     with mlflow.start_run(nested=True,run_name=f"trial_{trial.number+1}"):
         # Define the hyperparameters to tune
         params = {
-            # feature selection params
-            'fe_pipeline__feature_selection_pipeline__k':trial.suggest_int('k', 10, 70),
-            'fe_pipeline__feature_engineering_pipeline__categorical_nominal_pipeline__FE_construction_OHE__min_frequency':trial.suggest_float('min_frequency', 0.001, 0.3),
+            # feature Engg params
+            'fe_pipeline__feature_selection_pipeline__k':trial.suggest_int('k', 10, 30),
+            'fe_pipeline__feature_engineering_pipeline__categorical_nominal_pipeline__FE_construction_OHE__min_frequency':trial.suggest_float('min_frequency', 0.001, 0.2),
             'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__n_clusters':trial.suggest_int('n_bins', 7, 15),
-            'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__gamma':trial.suggest_int('gamma', 0.1, 1),
+            'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__gamma':trial.suggest_float('gamma', 0.1, 1),
+            # 'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__strategy':trial.suggest_categorical('strategy', ['uniform', 'quantile', 'kmeans']),
+            # 'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__n_bins':trial.suggest_int('n_bins', 3, 10),
             # model params
             'base_model__n_estimators': trial.suggest_int('n_estimators', 50, 300),
             'base_model__criterion': trial.suggest_categorical('criterion', ['gini', 'entropy']),
@@ -66,14 +67,6 @@ def objective(trial):
             'base_model__max_features': trial.suggest_categorical('max_features', ['sqrt', 'log2']),
             'base_model__bootstrap': trial.suggest_categorical('bootstrap', [True, False]),
         }
-        # Passthough logic for kbins
-        use_kbin_num =trial.suggest_categorical('use_kbin_num', [True, False]) # this is not stored in params as it is a passthrough and not used for logging explicitly
-        if use_kbin_num:
-            fe_kbin_params = {
-                'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__strategy':trial.suggest_categorical('strategy', ['uniform', 'quantile', 'kmeans']),
-                'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__n_bins':trial.suggest_int('n_bins', 3, 10),
-            }
-            params.update(fe_kbin_params)
         # Define the pipeline with Feature Engineering
         model_with_fe = Pipeline([
             ('fe_pipeline', FE_pipeline.selected_FE_with_FS),
@@ -84,7 +77,7 @@ def objective(trial):
         # Log hyperparameters in MLflow
         mlflow.log_params(params)
         # Train the model
-        model_with_fe.fit(X_train, y_train_transformed) # TODO implement early stopping
+        model_with_fe.fit(X_train, y_train_transformed)
         # Predict on the test set
         y_pred = model_with_fe.predict(X_test)
         # Calculate the F1 score for class 1 (minority class)
@@ -111,7 +104,7 @@ def perform_feature_engineering():
         # Create an Optuna study to maximize the F1 score for class 1
         study = optuna.create_study(direction='maximize')
         # Run the optimization with Optuna and log each trial in MLflow
-        study.optimize(objective, n_trials=200, show_progress_bar=True)
+        study.optimize(objective, n_trials=300, show_progress_bar=True)
         # Get the best hyperparameters
         best_params = study.best_trial.params
         # Log the best trial
@@ -121,10 +114,28 @@ def perform_feature_engineering():
             ('fe_pipeline', FE_pipeline.selected_FE_with_FS),
             ('base_model', ExtraTreesClassifier()) # this evaluates the FE pipeline
         ])
+        # recreate params from best trial
+        params = {
+            # feature Engg params
+            'fe_pipeline__feature_selection_pipeline__k': best_params['k'],
+            'fe_pipeline__feature_engineering_pipeline__categorical_nominal_pipeline__FE_construction_OHE__min_frequency': best_params['min_frequency'],
+            'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__n_clusters': best_params.get('n_clusters',10),
+            'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__gamma': best_params['gamma'],
+            # 'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__strategy': best_params['strategy'],
+            # 'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__n_bins': best_params['n_bins'],
+            # model params
+            'base_model__n_estimators': best_params['n_estimators'],
+            'base_model__criterion': best_params['criterion'],
+            'base_model__max_depth': best_params['max_depth'],
+            'base_model__min_samples_split': best_params['min_samples_split'],
+            'base_model__min_samples_leaf': best_params['min_samples_leaf'],
+            'base_model__max_features': best_params['max_features'],
+            'base_model__bootstrap': best_params['bootstrap'],
+        }
         # Set the hyperparameters (both model and FE pipeline)
-        model_with_fe.set_params(**best_params)
+        model_with_fe.set_params(**params)
         # Log the best hyperparameters in MLflow
-        mlflow.log_params(best_params)
+        mlflow.log_params(params)
         # Train the model
         eval_model = model_with_fe.fit(X_train, y_train_transformed)
         # Post tuning of selected best model (threshold adjustment as per business requirements)
