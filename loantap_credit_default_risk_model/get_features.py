@@ -30,6 +30,8 @@ df = data_handling.load_data_and_sanitize(config.FILE_NAME)
 X = df.drop(config.TARGET, axis=1)
 y = df[config.TARGET]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=config.RANDOM_SEED, stratify= y)
+X_train[config.TARGET] = y_train
+data_handling.save_data(X_train, 'train_data.csv')
 X_test[config.TARGET] = y_test
 data_handling.save_data(X_test, 'test_data.csv')
 # Transform the target
