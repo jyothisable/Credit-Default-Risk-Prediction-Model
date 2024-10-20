@@ -9,9 +9,7 @@ import sys
 from xgboost import XGBClassifier
 import mlflow
 import optuna
-from sklearn.pipeline import Pipeline
 from sklearn.metrics import f1_score
-from sklearn.model_selection import train_test_split
 
 # Get the path to the parent directory
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # root dir of project
@@ -25,12 +23,14 @@ from loantap_credit_default_risk_model import config, FE_pipeline, data_handling
 SCORING = 'f1'
 
 # Load and split data
-df = data_handling.load_data_and_sanitize(config.FILE_NAME)
-X = df.drop(config.TARGET, axis=1)
-y = df[config.TARGET]
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=config.RANDOM_SEED, stratify= y)
-X_test[config.TARGET] = y_test
-data_handling.save_data(X_test, 'test_data.csv')
+df_train = data_handling.load_data_and_sanitize('train_data.csv')
+X_train, y_train = df_train.drop(config.TARGET, axis=1), df_train[config.TARGET]
+df_test = data_handling.load_data_and_sanitize('test_data.csv')
+X_test, y_test = df_test.drop(config.TARGET, axis=1), df_test[config.TARGET]
+# Do feature engg transformation with fitted feature engineering pipeline (see get_features.py for optuna tuning of the pipeline)
+feature_engg = data_handling.load_pipeline('fe_pipeline_fitted')
+X_train_transformed = feature_engg.transform(X_train)
+X_test_transformed = feature_engg.transform(X_test)
 # Transform the target
 y_train_transformed = FE_pipeline.target_pipeline.fit_transform(y_train)
 # Transform test to match the target pipeline
@@ -42,39 +42,39 @@ def objective(trial):
     """
     Objective function for optuna tuning.
 
-    This function takes a trial object from optuna and trains an XGBoost model with feature engineering.
+    This function takes a trial object from optuna and trains an XGBoost model on top of predefined feature engg pipeline.
     It logs the hyperparameters and the F1 score for the minority class in MLflow.
-
-    :param trial: optuna trial object
-    :return: F1 score for the minority class
     """
     logging.info('Starting objective function for optuna trial')
     # Start an MLflow run
     with mlflow.start_run(nested=True,run_name=f"trial_{trial.number+1}"):
         # Define the hyperparameters to tune
-        param = {
-            'max_depth': trial.suggest_int('max_depth', 2, 10),
-            'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3,log=True),
-            'n_estimators': trial.suggest_int('n_estimators', 200, 800),
-            'gamma': trial.suggest_float('gamma', 1e-8, 1.0,log=True),
-            'subsample': trial.suggest_float('subsample', 0.6, 1.0),
-            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.5, 1.0),
-            'lambda': trial.suggest_float('lambda', 1e-3, 10.0,log=True),
-            'scale_pos_weight': trial.suggest_float('scale_pos_weight', 1.0, 4.0),  # Handle class imbalance
-            'tree_method': 'hist',  # Fixed parameter
-            'eval_metric': 'aucpr'  # Fixed parameter
+        params = {
+            'max_depth': trial.suggest_int('max_depth', 2, 15),
+            'learning_rate': trial.suggest_float('learning_rate', 0.001, 0.3, log=True),
+            'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
+            'gamma': trial.suggest_float('gamma', 1e-8, 1.0, log=True),
+            'subsample': trial.suggest_float('subsample', 0.5, 1.0),
+            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.4, 1.0),
+            'lambda': trial.suggest_float('lambda', 1e-5, 10.0, log=True),
+            'alpha': trial.suggest_float('alpha', 1e-5, 10.0, log=True),
+            'tree_method': 'hist',  # Fixed parameter for faster training and better handling of large datasets
+            'eval_metric': 'aucpr',  # Fixed parameter
+            'scale_pos_weight': trial.suggest_float('scale_pos_weight', 1.0, 10.0),
+            'min_child_weight': trial.suggest_int('min_child_weight', 1, 10),
+            'grow_policy': trial.suggest_categorical('grow_policy', ['depthwise', 'lossguide']),
+            # 'early_stopping_rounds': 100,  # Fixed parameter, but can also be tuned
+            'max_delta_step': trial.suggest_int('max_delta_step', 0, 10),
+            'max_leaves': trial.suggest_int('max_leaves', 0, 64),
         }
         # Define the pipeline with Feature Engineering and XGBoost
-        XGB_with_FE = Pipeline([
-            ('feature_engineering_pipeline', FE_pipeline.selected_FE_with_FS),
-            ('base_model', XGBClassifier(**param))
-        ])
+        XGB_with_FE = XGBClassifier(**params)
         # Log hyperparameters in MLflow
-        mlflow.log_params(param)
+        mlflow.log_params(params)
         # Train the model
-        XGB_with_FE.fit(X_train, y_train_transformed) # TODO implement early stopping
+        XGB_with_FE.fit(X_train_transformed, y_train_transformed) # TODO implement early stopping
         # Predict on the test set
-        y_pred = XGB_with_FE.predict(X_test)
+        y_pred = XGB_with_FE.predict(X_test_transformed)
         # Calculate the F1 score for class 1 (minority class)
         f1_class_1 = f1_score(y_test_transformed, y_pred, pos_label=1)
         # Log the F1 score in MLflow
@@ -96,25 +96,22 @@ def perform_training():
         # Create an Optuna study to maximize the F1 score for class 1
         study = optuna.create_study(direction='maximize')
         # Run the optimization with Optuna and log each trial in MLflow
-        study.optimize(objective, n_trials=50, show_progress_bar=True)
+        study.optimize(objective, n_trials=300, show_progress_bar=True)
         # Get the best hyperparameters
         best_params = study.best_trial.params
         # Log the best trial
         logging.info("Best trial: %s",best_params)
         # Train the final model with the best hyperparameters
-        XGB_with_FE_best = Pipeline([
-            ('feature_engineering_pipeline', FE_pipeline.selected_FE_with_FS),
-            ('base_model', XGBClassifier(**best_params))
-        ])
+        XGB_with_FE_best = XGBClassifier(**best_params)
         # Log the best hyperparameters in MLflow
         mlflow.log_params(best_params)
         # Train the model
-        XBG_model = XGB_with_FE_best.fit(X_train, y_train_transformed)
+        XBG_model = XGB_with_FE_best.fit(X_train_transformed, y_train_transformed)
         # Post tuning of selected best model (threshold adjustment as per business requirements)
         XBG_model_tuned,report = evaluation.tune_model_threshold_adjustment(XBG_model,
-                                                X_train,
+                                                X_train_transformed,
                                                 y_train,
-                                                X_test,
+                                                X_test_transformed,
                                                 y_test,
                                                 scoring=SCORING,
                                                 target_pipeline=FE_pipeline.target_pipeline)
