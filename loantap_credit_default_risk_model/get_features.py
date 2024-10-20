@@ -44,11 +44,8 @@ def objective(trial):
     """
     Objective function for optuna tuning.
 
-    This function takes a trial object from optuna and trains an XGBoost model with feature engineering.
+    This function takes a trial object from optuna and trains an ExtraTreesClassifier model with feature engineering.
     It logs the hyperparameters and the F1 score for the minority class in MLflow.
-
-    :param trial: optuna trial object
-    :return: F1 score for the minority class
     """
     logging.info('Starting objective function for optuna trial')
     # Start an MLflow run
@@ -97,10 +94,13 @@ def objective(trial):
         logging.info('Finished objective function for optuna trial')
     return f1_class_1
 
-def perform_training():
+def perform_feature_engineering():
     """
-    Train the model with the best hyperparameters found with Optuna and perform post-tuning threshold adjustment as per business requirements.
-    Save the trained model and the target pipeline to the 'trained_models' folder.
+    Perform feature engineering optimization using Optuna.
+    
+    This function will train a model with the best hyperparameters found by Optuna for feature engineering.
+    It will also log the best hyperparameters and the best model in MLflow.
+    Additionally, it will save the best model and the best feature engineering pipeline to the 'trained_models' folder.
     """
     logging.info('Starting training')
     mlflow.set_experiment("Feature Engineering Optuna Optimization")
@@ -148,4 +148,4 @@ def perform_training():
     logging.info('Model trained and saved pipeline to trained_models folder')
 
 if __name__ == '__main__':
-    perform_training()
+    perform_feature_engineering()
