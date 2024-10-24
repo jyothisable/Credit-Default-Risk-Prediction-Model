@@ -18,7 +18,7 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # ro
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
-from loantap_credit_default_risk_model import config, FE_pipeline, data_handling,evaluation
+from Prediction_Model import config, FE_pipeline, data_handling,evaluation
 
 SCORING = 'f1'
 
@@ -117,8 +117,8 @@ def perform_training():
                                                 target_pipeline=FE_pipeline.target_pipeline)
         mlflow.log_metrics(report['1']) # report is a nested dict for both class metrics => report['1'] gives all metrics for class 1 in dict format which will be logged
         mlflow.log_metric('threshold', XBG_model_tuned.best_threshold_)
-        mlflow.log_artifact("loantap_credit_default_risk_model/FE_pipeline.py")  # Log the pipeline as an artifact
-        mlflow.log_artifact("loantap_credit_default_risk_model/config.py")  # Log the config file
+        mlflow.log_artifact("Prediction_Model/FE_pipeline.py")  # Log the pipeline as an artifact
+        mlflow.log_artifact("Prediction_Model/config.py")  # Log the config file
         mlflow.sklearn.log_model(XBG_model_tuned, 'model')
 
     data_handling.save_pipeline(XBG_model_tuned, 'XBG_model')

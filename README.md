@@ -40,7 +40,7 @@ LoanTap-Credit-Default-Risk-Model/
 ┣ data/ - Contains raw data files for the project
 ┃ ┣ loantap_data.csv - Main dataset for training and testing
 ┃ ┗ test_data.csv - Test dataset for evaluating model performance (sampled from above dataset)
-┣ loantap_credit_default_risk_model/ - Contains source code for the project
+┣ Prediction_Model/ - Contains source code for the project
 ┃ ┣ __init__.py - Initialization file for the package
 ┃ ┣ trained_models/ - Directory to store trained machine learning models
 ┃ ┃ ┣ XBG_model.pkl - Main trained model
@@ -69,7 +69,7 @@ LoanTap-Credit-Default-Risk-Model/
 To train the model, run the following command in the root directory:
 
 ```bash
-python loantap_credit_default_risk_model/train.py
+python Prediction_Model/train.py
 ```
 
 To test the model, run the following command in the root directory:
@@ -81,7 +81,7 @@ python tests/test_prediction.py
 To make predictions, run the following command in the root directory:
 
 ```bash
-python loantap_credit_default_risk_model/predict.py
+python Prediction_Model/predict.py
 ```
 
 ## Dataset

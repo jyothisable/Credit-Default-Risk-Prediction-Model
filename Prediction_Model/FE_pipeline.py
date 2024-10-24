@@ -11,7 +11,7 @@ from sklearn.metrics.pairwise import rbf_kernel
 
 from sklearn.feature_selection import SelectKBest,chi2,mutual_info_classif
     
-import loantap_credit_default_risk_model.config as config
+import Prediction_Model.config as config
 
 
 

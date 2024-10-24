@@ -1,7 +1,7 @@
 
 import pandas as pd
 import streamlit as st
-from loantap_credit_default_risk_model import data_handling
+from Prediction_Model import data_handling
 
 model = data_handling.load_pipeline('XBG_model')
 

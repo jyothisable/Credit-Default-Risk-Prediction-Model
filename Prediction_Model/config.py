@@ -52,6 +52,11 @@ NUM_SKEWED_FEATURES2 = ['annual_inc','dti','revol_bal']
 
 POST_FE_FEATURES = ''
 
+DEFAULT_VALUES = { # default values to be passed when feature is missing / not required from used because very less features are important
+    
+}
+# TODO fill most frequent values here and then modify fastAPI, flask_app and streamlit_app accordingly with input params as input.update(dict) 
+
 TARGET = 'loan_status'
 
 # Training configs

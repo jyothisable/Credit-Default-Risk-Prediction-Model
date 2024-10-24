@@ -8,8 +8,8 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # ro
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
     
-from loantap_credit_default_risk_model.data_handling import load_data_and_sanitize
-from loantap_credit_default_risk_model import config
+from Prediction_Model.data_handling import load_data_and_sanitize
+from Prediction_Model import config
 
 # Test Data import
 df  = load_data_and_sanitize(config.FILE_NAME)

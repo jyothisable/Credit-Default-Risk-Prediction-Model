@@ -6,7 +6,7 @@ import logging
 import pandas as pd
 import dill  # for saving pipeline
 
-from loantap_credit_default_risk_model import config
+from Prediction_Model import config
 
 def download_and_load_data(url : str = config.URL,file_name='') -> pd.DataFrame:
     """
@@ -69,7 +69,7 @@ def save_pipeline(pipeline, pipe_name: str) -> None:
         pipeline (Pipeline): The pipeline to save.
     """
     logging.info('Saving pipeline to trained_models folder')
-    with open(f'{config.PARENT_ABS_PATH}/loantap_credit_default_risk_model/trained_models/{pipe_name}.pkl', 'wb') as f:
+    with open(f'{config.PARENT_ABS_PATH}/Prediction_Model/trained_models/{pipe_name}.pkl', 'wb') as f:
         dill.dump(pipeline, f)
     print(f'Saved pipeline to trained_models/{pipe_name}.pkl')
     
@@ -84,6 +84,6 @@ def load_pipeline(pipe_name: str):
     Returns:
         Pipeline: The loaded pipeline.
     """
-    with open(f'{config.PARENT_ABS_PATH}/loantap_credit_default_risk_model/trained_models/{pipe_name}.pkl', 'rb') as f:
+    with open(f'{config.PARENT_ABS_PATH}/Prediction_Model/trained_models/{pipe_name}.pkl', 'rb') as f:
         pipe = dill.load(f)
     return pipe

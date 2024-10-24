@@ -12,8 +12,8 @@ from sklearn.metrics import classification_report
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import TunedThresholdClassifierCV
 
-from loantap_credit_default_risk_model.config import N_JOBS, RANDOM_SEED
-from loantap_credit_default_risk_model.plotting import plot_threshold_scoring
+from Prediction_Model.config import N_JOBS, RANDOM_SEED
+from Prediction_Model.plotting import plot_threshold_scoring
 
 def feature_engg_evaluator(x_train, y_train, x_test, y_test, feature_engineering_pipeline,target_pipeline):
     """

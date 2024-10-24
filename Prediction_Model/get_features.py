@@ -21,7 +21,7 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # ro
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
-from loantap_credit_default_risk_model import config, FE_pipeline, data_handling,evaluation
+from Prediction_Model import config, FE_pipeline, data_handling,evaluation
 
 SCORING = 'f1'
 
@@ -56,7 +56,7 @@ def objective(trial):
             # feature Engg params
             'fe_pipeline__feature_selection_pipeline__k':trial.suggest_int('k', 12, 25),
             'fe_pipeline__feature_engineering_pipeline__categorical_nominal_pipeline__FE_construction_OHE__min_frequency':trial.suggest_float('min_frequency', 0.001, 0.2),
-            'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__n_clusters':trial.suggest_int('n_clusters', 7, 15),
+            'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__n_clusters':trial.suggest_int('n_clusters', 7, 20),
             'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__gamma':trial.suggest_float('gamma', 0.1, 1),
             # 'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__strategy':trial.suggest_categorical('strategy', ['uniform', 'quantile', 'kmeans']),
             # 'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__n_bins':trial.suggest_int('n_bins', 3, 10),
@@ -154,8 +154,8 @@ def perform_feature_engineering(n_trials=50):
                                                 target_pipeline=FE_pipeline.target_pipeline)
         mlflow.log_metrics(report['1']) # report is a nested dict for both class metrics => report['1'] gives all metrics for class 1 in dict format which will be logged
         mlflow.log_metric('threshold', eval_model_tuned.best_threshold_)
-        mlflow.log_artifact("loantap_credit_default_risk_model/FE_pipeline.py")  # Log the pipeline as an artifact
-        mlflow.log_artifact("loantap_credit_default_risk_model/config.py")  # Log the config file
+        mlflow.log_artifact("Prediction_Model/FE_pipeline.py")  # Log the pipeline as an artifact
+        mlflow.log_artifact("Prediction_Model/config.py")  # Log the config file
         mlflow.sklearn.log_model(eval_model_tuned, 'eval_model')
         mlflow.sklearn.log_model(eval_model.named_steps['fe_pipeline'], 'fe_pipeline_fitted')
 

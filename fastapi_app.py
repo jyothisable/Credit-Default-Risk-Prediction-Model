@@ -1,10 +1,10 @@
 # Importing Dependencies
 from fastapi import FastAPI
-from fastapi.encoders import jsonable_encoder
+# from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 import uvicorn
 import pandas as pd
-from loantap_credit_default_risk_model import data_handling
+from Prediction_Model import data_handling
 
 app = FastAPI()
 
@@ -36,7 +36,8 @@ class LoanFeatures(BaseModel):
     pub_rec_bankruptcies: float
     address: str
 
-model = data_handling.load_pipeline('XBG_model')
+fe_pipe = data_handling.load_pipeline('fe_pipeline_fitted_final')
+model = data_handling.load_pipeline('XBG_model_final')
 
 @app.get('/')
 def index():
@@ -50,7 +51,7 @@ async def predict(loan_data: LoanFeatures):
     # Extract the data from the input
     data = loan_data.model_dump()
     df = pd.DataFrame([data])
-    pred = model.predict(df)
+    pred = model.predict(fe_pipe.transform(df)) # do FE and then predict on test data (df)
     if pred[0] == 0:
         return {'Status of Loan Application': 'Approved'}
     else:

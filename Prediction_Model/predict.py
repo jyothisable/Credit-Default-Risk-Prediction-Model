@@ -15,7 +15,7 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # ro
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
     
-from loantap_credit_default_risk_model import config, data_handling
+from Prediction_Model import config, data_handling
 
 fe_pipe = data_handling.load_pipeline('fe_pipeline_fitted')
 model = data_handling.load_pipeline('XBG_model')
