@@ -11,8 +11,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 Prediction_Model/trained_models/fe_eval_model.pkl
-Prediction_Model/trained_models/fe_eval_model.pkl
-
+Prediction_Model/trained_models/fe_eval_tuned_model.pkl
 # C extensions
 *.so
 
