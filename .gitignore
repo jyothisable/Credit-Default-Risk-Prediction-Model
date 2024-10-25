@@ -10,6 +10,8 @@ data/loan.csv
 __pycache__/
 *.py[cod]
 *$py.class
+Prediction_Model/trained_models/fe_eval_model.pkl
+Prediction_Model/trained_models/fe_eval_model.pkl
 
 # C extensions
 *.so
