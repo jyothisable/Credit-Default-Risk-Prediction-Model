@@ -6,13 +6,16 @@ import logging
 import os
 import sys
 
+from xgboost import XGBClassifier
+
 # from xgboost import XGBClassifier
 from sklearn.ensemble import ExtraTreesClassifier
 import mlflow
 import optuna
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score,classification_report
 from sklearn.model_selection import train_test_split
+from xgboost import XGBClassifier
 
 # Get the path to the parent directory
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # root dir of project
@@ -54,26 +57,26 @@ def objective(trial):
         # Define the hyperparameters to tune
         params = {
             # feature Engg params
-            'fe_pipeline__feature_selection_pipeline__k':trial.suggest_int('k', 12, 25),
+            'fe_pipeline__feature_selection_pipeline__k':trial.suggest_int('k', 15, 30),
             'fe_pipeline__feature_engineering_pipeline__categorical_nominal_pipeline__FE_construction_OHE__min_frequency':trial.suggest_float('min_frequency', 0.001, 0.2),
-            'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__n_clusters':trial.suggest_int('n_clusters', 7, 20),
+            'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__n_clusters':trial.suggest_int('n_clusters', 7, 25),
             'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__all_numerical__FE_construction_similarity__FE_construction_distance_to_cluster__gamma':trial.suggest_float('gamma', 0.1, 1),
             # 'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__strategy':trial.suggest_categorical('strategy', ['uniform', 'quantile', 'kmeans']),
             # 'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__n_bins':trial.suggest_int('n_bins', 3, 10),
             # model params
-            'base_model__n_estimators': trial.suggest_int('n_estimators', 50, 300),
-            'base_model__criterion': trial.suggest_categorical('criterion', ['gini', 'entropy']),
-            'base_model__max_depth': trial.suggest_int('max_depth', 2, 32),
-            'base_model__min_samples_split': trial.suggest_int('min_samples_split', 2, 20),
-            'base_model__min_samples_leaf': trial.suggest_int('min_samples_leaf', 2, 20),
-            'base_model__max_features': trial.suggest_categorical('max_features', ['sqrt', 'log2']),
-            'base_model__bootstrap': trial.suggest_categorical('bootstrap', [True, False]),
-            'base_model__random_state': config.RANDOM_SEED
+        #     'base_model__n_estimators': trial.suggest_int('n_estimators', 150, 500),
+        #     'base_model__criterion': trial.suggest_categorical('criterion', ['gini', 'entropy']),
+        #     'base_model__max_depth': trial.suggest_int('max_depth', 2, 32),
+        #     'base_model__min_samples_split': trial.suggest_int('min_samples_split', 2, 20),
+        #     'base_model__min_samples_leaf': trial.suggest_int('min_samples_leaf', 2, 20),
+        #     'base_model__max_features': trial.suggest_categorical('max_features', ['sqrt', 'log2']),
+        #     'base_model__bootstrap': trial.suggest_categorical('bootstrap', [True, False]),
+        #     'base_model__random_state': config.RANDOM_SEED
         }
         # Define the pipeline with Feature Engineering
         model_with_fe = Pipeline([
             ('fe_pipeline', FE_pipeline.selected_FE_with_FS),
-            ('base_model', ExtraTreesClassifier()) # this evaluates the FE pipeline
+            ('base_model', XGBClassifier()) # this evaluates the FE pipeline
         ])
         # Set the hyperparameters (both model and FE pipeline)
         model_with_fe.set_params(**params)
@@ -83,12 +86,14 @@ def objective(trial):
         model_with_fe.fit(X_train, y_train_transformed)
         # Predict on the test set
         y_pred = model_with_fe.predict(X_test)
-        # Calculate the F1 score for class 1 (minority class)
-        f1_class_1 = f1_score(y_test_transformed, y_pred, pos_label=1)
+        # Calculate the metrics for class 1 (minority class)
+        # f1_class_1 = f1_score(y_test_transformed, y_pred, pos_label=1)
+        report  = classification_report(y_test_transformed, y_pred,output_dict=True)['1'] #  take output as dict so that we can log later in MLflow
+        recall, f1= report['recall'], report['f1-score']
         # Log the F1 score in MLflow
-        mlflow.log_metric('f1_score', f1_class_1)
+        mlflow.log_metric('f1_score', round(f1,2))
         logging.info('Finished objective function for optuna trial')
-    return f1_class_1
+    return round(f1,2)
 
 def perform_feature_engineering(n_trials=50):
     """
@@ -105,10 +110,11 @@ def perform_feature_engineering(n_trials=50):
         mlflow.set_tag("FE_engg", "EXTRA")
         mlflow.set_tag("objective", "maximize_f1_class_1")
         # Create an Optuna study to maximize the F1 score for class 1
-        study = optuna.create_study(direction='maximize')
+        study = optuna.create_study(direction='maximize') # maximize f1 
         # Run the optimization with Optuna and log each trial in MLflow
         study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
         # Get the best hyperparameters
+        # best_trial = min(study.best_trials, key=lambda t: t.values[1]) # select the one with least k value assuming f1 is already maximized
         best_params = study.best_trial.params
         # Log the best trial
         logging.info("Best trial: %s",best_params)
@@ -127,13 +133,13 @@ def perform_feature_engineering(n_trials=50):
             # 'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__strategy': best_params['strategy'],
             # 'fe_pipeline__feature_engineering_pipeline__numerical_combined_pipeline__FE_construction_binning__n_bins': best_params['n_bins'],
             # model params
-            'base_model__n_estimators': best_params['n_estimators'],
-            'base_model__criterion': best_params['criterion'],
-            'base_model__max_depth': best_params['max_depth'],
-            'base_model__min_samples_split': best_params['min_samples_split'],
-            'base_model__min_samples_leaf': best_params['min_samples_leaf'],
-            'base_model__max_features': best_params['max_features'],
-            'base_model__bootstrap': best_params['bootstrap'],
+            # 'base_model__n_estimators': best_params['n_estimators'],
+            # 'base_model__criterion': best_params['criterion'],
+            # 'base_model__max_depth': best_params['max_depth'],
+            # 'base_model__min_samples_split': best_params['min_samples_split'],
+            # 'base_model__min_samples_leaf': best_params['min_samples_leaf'],
+            # 'base_model__max_features': best_params['max_features'],
+            # 'base_model__bootstrap': best_params['bootstrap'],
         }
         # Set the hyperparameters (both model and FE pipeline)
         eval_model.set_params(**params)
@@ -164,6 +170,7 @@ def perform_feature_engineering(n_trials=50):
     data_handling.save_pipeline(eval_model.named_steps['fe_pipeline'], 'fe_pipeline_fitted') # Save best fe pipeline for actual model training in train.py
     data_handling.save_pipeline(FE_pipeline.target_pipeline, 'target_pipeline_fitted')
     logging.info('Model trained and saved pipeline to trained_models folder')
+    # return   # TODO return SHARP with coefficients and report
 
 if __name__ == '__main__':
-    perform_feature_engineering(n_trials=300)
+    perform_feature_engineering(n_trials=100)

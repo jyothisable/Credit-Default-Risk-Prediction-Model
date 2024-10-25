@@ -96,7 +96,7 @@ def perform_training():
         # Create an Optuna study to maximize the F1 score for class 1
         study = optuna.create_study(direction='maximize')
         # Run the optimization with Optuna and log each trial in MLflow
-        study.optimize(objective, n_trials=300, show_progress_bar=True)
+        study.optimize(objective, n_trials=100, show_progress_bar=True)
         # Get the best hyperparameters
         best_params = study.best_trial.params
         # Log the best trial
