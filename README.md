@@ -1,6 +1,6 @@
 # End-to-End ML Credit Default Risk Prediction Model
 
-<img src="Designer.jpeg" alt="logo banner" style="width: 800px;"/>
+<img src="notebooks/Designer.jpeg" alt="logo banner" style="width: 800px;"/>
 
 ## Introduction
 
@@ -8,7 +8,7 @@ This project aims to develop an End-to-End machine learning model to predict loa
 
 ### Tech used
 
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)![Pandas](https://img.shields.io/badge/Pandas-1.x-brightgreen?logo=pandas)![NumPy](https://img.shields.io/badge/NumPy-1.x-orange?logo=numpy)![Matplotlib](https://img.shields.io/badge/Matplotlib-3.x-blueviolet?logo=plotly)![Plotly](https://img.shields.io/badge/Plotly-5.x-informational?logo=plotly)![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-0.24%2B-lightgrey?logo=scikit-learn)![MLFlow](https://img.shields.io/badge/MLFlow-1.x-blue?logo=mlflow)![Optuna](https://img.shields.io/badge/Optuna-3.x-red?logo=optuna)![FastAPI](https://img.shields.io/badge/FastAPI-0.85%2B-brightgreen?logo=fastapi)![Streamlit](https://img.shields.io/badge/Streamlit-1.x-orange?logo=streamlit)![Flask](https://img.shields.io/badge/Flask-2.x-black?logo=flask)## Project Overview
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)![Pandas](https://img.shields.io/badge/Pandas-1.x-brightgreen?logo=pandas)![NumPy](https://img.shields.io/badge/NumPy-1.x-orange?logo=numpy)![Matplotlib](https://img.shields.io/badge/Matplotlib-3.x-blueviolet?logo=plotly)![Plotly](https://img.shields.io/badge/Plotly-5.x-informational?logo=plotly)![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-0.24%2B-lightgrey?logo=scikit-learn)![MLFlow](https://img.shields.io/badge/MLFlow-1.x-blue?logo=mlflow)![Optuna](https://img.shields.io/badge/Optuna-3.x-red?logo=optuna)![FastAPI](https://img.shields.io/badge/FastAPI-0.85%2B-brightgreen?logo=fastapi)![Streamlit](https://img.shields.io/badge/Streamlit-1.x-orange?logo=streamlit)![Flask](https://img.shields.io/badge/Flask-2.x-black?logo=flask)
 
 ### Key Features
 
@@ -37,11 +37,11 @@ This project aims to develop an End-to-End machine learning model to predict loa
 
 2. Set up virtual environment and dependencies:
   
-  In a terminal, navigate to the project directory and run the following commands:
-   ```bash
-   poetry install
-   poetry shell
-   ```
+   In a terminal, navigate to the project directory and run the following commands:
+      ```bash
+      poetry install
+      poetry shell
+      ```
 
 ## Project Structure
 
@@ -106,13 +106,8 @@ This project aims to develop an End-to-End machine learning model to predict loa
 To train the model, run the following command in the root directory:
 
 ```bash
-python Prediction_Model/train.py
-```
-
-To test the model, run the following command in the root directory:
-
-```bash
-python tests/test_prediction.py
+python Prediction_Model/train.py # feature engg pipeline
+python Prediction_Model/train.py # Traning pipeline
 ```
 
 To make predictions on test data, run the following command in the root directory:
@@ -121,7 +116,13 @@ To make predictions on test data, run the following command in the root director
 python Prediction_Model/predict.py
 ```
 
-Running applications
+To test the model, run the following command in the root directory:
+
+```bash
+pytest tests/test_prediction.py
+```
+
+**Running applications**
 
    For fastAPI (local)
 
@@ -149,18 +150,25 @@ Refer to [here](https://www.kaggle.com/datasets/ranadeep/credit-risk-dataset) or
 
 The model used for this project is an XGBoost classifier. The hyperparameters used for training are as follows after tuning with optuna:
 
-* learning_rate: 0.15
-* n_estimators: 300
-* max_depth: 5
-* subsample: 0.95
-* colsample_bytree: 0.95
-* lambda: 0.1
-* tree_method: hist
-* eval_metric: aucpr
+```python
+{
+    'max_depth': 9,
+    'learning_rate': 0.094,
+    'n_estimators': 507,
+    'gamma': 0.0062,
+    'subsample': 0.962,
+    'colsample_bytree': 0.795,
+    'lambda': 0.389,
+    'alpha': 0.0233,
+    'scale_pos_weight': 1.99,
+    'min_child_weight': 2,
+    'grow_policy': 'lossguide'
+}
+```
 
 ## Results
 
-The model achieved an f1 score of 79% and recall of 81% on the test set.
+The model achieved an f1 score of **79.12%** and recall of **85.84%** on the test dataset.
 
 ## License
 
