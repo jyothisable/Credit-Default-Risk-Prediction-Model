@@ -12,6 +12,7 @@ __pycache__/
 *$py.class
 Prediction_Model/trained_models/fe_eval_model.pkl
 Prediction_Model/trained_models/fe_eval_tuned_model.pkl
+..bfg-report
 # C extensions
 *.so
 
