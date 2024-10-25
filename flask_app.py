@@ -4,32 +4,34 @@ Flask app for loan default risk prediction
 from flask import Flask, render_template, request
 import pandas as pd
 
-# Then perform import
+# Import necessary functions from your data handling module
 from Prediction_Model import data_handling
 
-model = data_handling.load_pipeline('XBG_model')
+# Load pre-trained pipelines
+fe_pipe = data_handling.load_pipeline('fe_pipeline_fitted_final')
+model = data_handling.load_pipeline('XBG_model_final')
 
 app = Flask(__name__)
 
-@app.route('/predict', methods=['POST'])
-def predict():
+@app.route('/', methods=['GET', 'POST'])
+def home():
     """
-    Handles POST requests from the homepage form, makes a prediction and renders the homepage with the result.
-    
-    :return: Rendered homepage with the result of the prediction
+    Renders the homepage and handles loan prediction requests.
     """
+    prediction = None
     if request.method == 'POST':
         request_data = dict(request.form)
         data = pd.DataFrame([request_data])
         print(data)
-        pred = model.predict(data)
+        pred = model.predict(fe_pipe.transform(data))  # Perform feature engineering and make prediction
         print(f"prediction is {pred}")
 
         if int(pred[0]) == 0:
-            result = "Congratulations! Your loan application is approved"
+            prediction = "Congratulations! Your loan application is approved 🎉"
         else:
-            result = "Sorry! Your loan application is rejected"
-        return render_template('homepage.html', prediction = result)
+            prediction = "Sorry! Your loan application is rejected 🚫"
+    
+    return render_template('homepage.html', prediction=prediction)
 
 @app.errorhandler(500)
 def internal_error(error):
