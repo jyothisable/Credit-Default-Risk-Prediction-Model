@@ -3,6 +3,7 @@
 <img src="Designer.jpeg" alt="logo banner" style="width: 800px;"/>
 
 ## Introduction
+
 This project aims to develop an End-to-End machine learning model to predict loan default risk for a financial services platform. The model is trained on a dataset of borrower attributes, including financial, demographic, and credit-related features. The goal is to enable data-driven decisions in the loan underwriting process.
 
 ### Tech used
