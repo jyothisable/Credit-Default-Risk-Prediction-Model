@@ -106,7 +106,7 @@ This project aims to develop an End-to-End machine learning model to predict loa
 > [!IMPORTANT] 
 > Make sure to activate poetry by running `poetry shell` in the root directory before running any commands or add  `poetry run` in beginning of every command below.
 
-#### Training
+### Training
 
 To train the model, run the following command in the root directory:
 
@@ -115,7 +115,7 @@ python Prediction_Model/train.py # feature engg pipeline
 python Prediction_Model/train.py # Traning pipeline
 ```
 
-#### Prediction
+### Prediction
 
 To make predictions on test data, run the following command in the root directory:
 
@@ -123,7 +123,7 @@ To make predictions on test data, run the following command in the root director
 python Prediction_Model/predict.py
 ```
 
-#### Testing
+### Testing
 
 To test the model, run the following command in the root directory:
 
@@ -131,13 +131,15 @@ To test the model, run the following command in the root directory:
 pytest tests/test_prediction.py
 ```
 
-#### Running Web Apps
+### Running Web Apps
 
    For fastAPI (local)
 
    ```bash
-   python fastapi_app.py # post to localhost:8000/predict, /doc in browser for documentation
+   python fastapi_app.py 
    ```
+
+   POST to localhost:8000/predict with Postman or use /docs in browser for documentation / testing
 
    For Streamlit app (local)
 
@@ -147,7 +149,7 @@ pytest tests/test_prediction.py
 
 ## Usage with docker
 
-#### 1. Pulling the Docker Image
+### 1. Pulling the Docker Image
 
 To pull the Docker image from Docker Hub, run the following command:
 
@@ -156,7 +158,7 @@ To pull the Docker image from Docker Hub, run the following command:
 docker pull jyothisable/credit_risk_streamlit_app
 ```
 
-#### 2. Running the Docker Container
+### 2. Running the Docker Container
 
 To run the Docker container, use the following command:
 
