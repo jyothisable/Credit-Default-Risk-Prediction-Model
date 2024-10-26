@@ -5,20 +5,22 @@ description = ""
 authors = ["jyothisable <athuljyothis18@gmail.com>"]
 readme = "README.md"
 
-[tool.poetry.dependencies]
+[tool.poetry.dependencies] # main dependencies which will be installed every time
 python = ">=3.12,<3.13"
 pandas = "^2.2.2"
 numpy = "<2"
+
+[tool.poetry.group.development.dependencies] # dependencies only for development (thus not needed in docker)
 seaborn = "^0.13.2"
-scikit-learn = "^1.5.1"
 ydata-profiling = "^4.9.0"
 ipykernel = "^6.29.5"
-setuptools = "^74.1.2"
 ipywidgets = "^8.1.5"
 pytest = "^8.3.3"
-category-encoders = "^2.6.3"
 pyqt5 = "^5.15.11"
-feature-engine = "^1.8.1"
+plotly = "^5.24.1"
+
+[tool.poetry.group.deployment.dependencies] # dependencies only for deployment (used in docker for dev install)
+scikit-learn = "^1.5.1"
 xgboost = "^2.1.1"
 dill = "^0.3.9"
 mlflow = "^2.16.2"
@@ -28,7 +30,6 @@ fastapi = "^0.115.2"
 pydantic = "^2.9.2"
 uvicorn = "^0.31.1"
 streamlit = "^1.39.0"
-plotly = "^5.24.1"
 nbformat = "^5.10.4"
 
 
