@@ -103,6 +103,8 @@ This project aims to develop an End-to-End machine learning model to predict loa
 
 ## Usage
 
+#### Training
+
 To train the model, run the following command in the root directory:
 
 ```bash
@@ -110,11 +112,15 @@ python Prediction_Model/train.py # feature engg pipeline
 python Prediction_Model/train.py # Traning pipeline
 ```
 
+#### Prediction
+
 To make predictions on test data, run the following command in the root directory:
 
 ```bash
 python Prediction_Model/predict.py
 ```
+
+#### Testing
 
 To test the model, run the following command in the root directory:
 
@@ -122,7 +128,7 @@ To test the model, run the following command in the root directory:
 pytest tests/test_prediction.py
 ```
 
-**Running applications**
+#### Running Web Apps
 
    For fastAPI (local)
 
@@ -136,11 +142,25 @@ pytest tests/test_prediction.py
    poetry run streamlit run streamlit_app.py # local   ```
    ```
 
-   For Flask app (local)
+## Usage with docker
 
-   ```bash
-   poetry run python flask_app.py # localhost:8080
-   ```
+#### 1. Pulling the Docker Image
+
+To pull the Docker image from Docker Hub, run the following command:
+
+```sh
+# Pull the docker image
+docker pull jyothisable/credit_risk_streamlit_app
+```
+
+#### 2. Running the Docker Container
+
+To run the Docker container, use the following command:
+
+```sh
+# Run the docker container
+docker run -p 8501:8501 credit_risk_streamlit_app # goto http://localhost:8501 in browser
+```
 
 ## Dataset
 
