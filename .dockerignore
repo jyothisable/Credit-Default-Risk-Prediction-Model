@@ -1,2 +1,6 @@
 mlruns
-notebooks
+Prediction_Model/trained_models/fe_pipeline_fitted.pkl
+Prediction_Model/trained_models/XBG_model.pkl
+notebooks/EDA_report.html
+notebooks/model_prototyping.ipynb
+data/loan.csv

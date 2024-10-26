@@ -8,10 +8,10 @@ COPY . .
 
 # install dependencies with poetry
 RUN pip install poetry==1.8.3
-RUN poetry install --no-dev
+RUN poetry install --without development
 
 # Expose port
-EXPOSE 8000
+EXPOSE 8501
 
 # Run the app
-CMD ["poetry", "run", "python", "fastapi_app.py"]
+CMD ["poetry", "run", "streamlit", "run", "streamlit_app.py"]
