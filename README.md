@@ -133,15 +133,15 @@ pytest tests/test_prediction.py
 
 ### Running Web Apps
 
-   For fastAPI (local)
+#### fastAPI
 
    ```bash
    python fastapi_app.py 
    ```
 
-   POST to localhost:8000/predict with Postman or use /docs in browser for documentation / testing
+   POST to `localhost:8000/predict` with Postman or use `localhost:8000/predict/docs` in browser for documentation / testing
 
-   For Streamlit app (local)
+#### Streamlit App
 
    ```bash
    streamlit run streamlit_app.py # local   ```
