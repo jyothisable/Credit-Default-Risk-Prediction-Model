@@ -19,7 +19,7 @@ This project aims to develop an End-to-End machine learning model to predict loa
 * Deployment of API with FastAPI in docker container
 * Frontend with streamlit and flask app
 
-## Installation/Environment Setup
+## Installation / Environment Setup
 
 ### Prerequisites
 
@@ -103,6 +103,9 @@ This project aims to develop an End-to-End machine learning model to predict loa
 
 ## Usage
 
+> [!IMPORTANT] 
+> Make sure to activate poetry by running `poetry shell` in the root directory before running any commands or add  `poetry run` in beginning of every command below.
+
 #### Training
 
 To train the model, run the following command in the root directory:
@@ -133,13 +136,13 @@ pytest tests/test_prediction.py
    For fastAPI (local)
 
    ```bash
-   poetry run python fastapi_app.py # post to localhost:8000/predict, /doc in browser for documentation
+   python fastapi_app.py # post to localhost:8000/predict, /doc in browser for documentation
    ```
 
    For Streamlit app (local)
 
    ```bash
-   poetry run streamlit run streamlit_app.py # local   ```
+   streamlit run streamlit_app.py # local   ```
    ```
 
 ## Usage with docker
