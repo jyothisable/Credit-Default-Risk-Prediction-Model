@@ -121,7 +121,7 @@ def perform_feature_engineering(n_trials=50):
         # Define the pipeline with Feature Engineering
         eval_model = Pipeline([
             ('fe_pipeline', FE_pipeline.selected_FE_with_FS),
-            ('base_model', ExtraTreesClassifier()) # this evaluates the FE pipeline
+            ('base_model', XGBClassifier()) # this evaluates the FE pipeline
         ])
         # recreate params from best trial
         params = {
