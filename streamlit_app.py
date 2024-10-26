@@ -16,15 +16,19 @@ def main():
     st.set_page_config(page_title="Credit Default Risk Prediction", page_icon="🏦", layout="wide")
     
     # Add header and title
-    st.title("🏦 Credit Default Risk Prediction ML Model")
+    left_co, cent_co,last_co = st.columns([1,3,1])
+    with cent_co:
+        st.title("🏦 Credit Default Risk Prediction ML Model")
+        st.image('notebooks/Designer.jpeg')
+    
     st.markdown("""
     ### 📋 Predict Your Loan Approval Status
     Please provide the required details to check whether your loan application will be **approved** or **rejected**.  
     """)
 
     # Sidebar Information
-    st.sidebar.image("notebooks/Designer.jpeg", use_column_width=True)
-    st.sidebar.title("Loan Prediction App")
+    # st.sidebar.image("notebooks/Designer.jpeg", use_column_width=True)
+    st.sidebar.title("Credit Default Risk Prediction")
     st.sidebar.markdown("""
     This application uses an End-to-End deployable machine learning model to predict whether your loan application will be approved or not based on input details.
     """)
@@ -59,7 +63,9 @@ def main():
             addr_state = st.selectbox("📍 State", ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"])
         
         # Form submission button
-        submit_button = st.form_submit_button(label="🔍 Predict Loan Status",use_container_width=True,type="primary")
+        left_co, cent_co,last_co = st.columns([1,3,1])
+        with cent_co:
+            submit_button = st.form_submit_button(label="🔍 Predict Loan Status",use_container_width=True,type="primary")
 
         if submit_button:
             # Collect input data with most frequent values for optional fields
