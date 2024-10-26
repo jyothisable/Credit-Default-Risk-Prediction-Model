@@ -18,8 +18,10 @@ This project aims to develop an End-to-End machine learning model to predict loa
 * Feature engineering and selection with sklearn pipelines
 * Model evaluation and hyperparameter tuning with optuna
 * Model registry and tracking with MLFlow
-* Deployment of API with FastAPI in docker container
+* Testing with pytest
+* Deployment of API with FastAPI
 * Frontend with streamlit App
+* Containerization with Docker
 
 ## Installation / Environment Setup
 
