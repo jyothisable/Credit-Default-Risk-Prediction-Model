@@ -2,13 +2,15 @@
 
 <img src="notebooks/Designer.jpeg" alt="logo banner" style="width: 800px;"/>
 
+## [LIVE DEMO](https://credit-default-risk-prediction-model.streamlit.app/) -> [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://credit-default-risk-prediction-model.streamlit.app/)
+
 ## Introduction
 
 This project aims to develop an End-to-End machine learning model to predict loan default risk for a financial services platform. The model is trained on a dataset of borrower attributes, including financial, demographic, and credit-related features. The goal is to enable data-driven decisions in the loan underwriting process.
 
 ### Tech used
 
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)![Pandas](https://img.shields.io/badge/Pandas-1.x-brightgreen?logo=pandas)![NumPy](https://img.shields.io/badge/NumPy-1.x-orange?logo=numpy)![Matplotlib](https://img.shields.io/badge/Matplotlib-3.x-blueviolet?logo=plotly)![Plotly](https://img.shields.io/badge/Plotly-5.x-informational?logo=plotly)![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-0.24%2B-lightgrey?logo=scikit-learn)![MLFlow](https://img.shields.io/badge/MLFlow-1.x-blue?logo=mlflow)![Optuna](https://img.shields.io/badge/Optuna-3.x-red?logo=optuna)![FastAPI](https://img.shields.io/badge/FastAPI-0.85%2B-brightgreen?logo=fastapi)![Streamlit](https://img.shields.io/badge/Streamlit-1.x-orange?logo=streamlit)![Flask](https://img.shields.io/badge/Flask-2.x-black?logo=flask)
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)![Pandas](https://img.shields.io/badge/Pandas-1.x-brightgreen?logo=pandas)![NumPy](https://img.shields.io/badge/NumPy-1.x-orange?logo=numpy)![Matplotlib](https://img.shields.io/badge/Matplotlib-3.x-blueviolet?logo=plotly)![Plotly](https://img.shields.io/badge/Plotly-5.x-informational?logo=plotly)![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-0.24%2B-lightgrey?logo=scikit-learn)![MLFlow](https://img.shields.io/badge/MLFlow-1.x-blue?logo=mlflow)![Optuna](https://img.shields.io/badge/Optuna-3.x-red?logo=optuna)![FastAPI](https://img.shields.io/badge/FastAPI-0.85%2B-brightgreen?logo=fastapi)![Streamlit](https://img.shields.io/badge/Streamlit-1.x-orange?logo=streamlit)
 
 ### Key Features
 
@@ -17,7 +19,7 @@ This project aims to develop an End-to-End machine learning model to predict loa
 * Model evaluation and hyperparameter tuning with optuna
 * Model registry and tracking with MLFlow
 * Deployment of API with FastAPI in docker container
-* Frontend with streamlit and flask app
+* Frontend with streamlit App
 
 ## Installation / Environment Setup
 
@@ -78,9 +80,6 @@ This project aims to develop an End-to-End machine learning model to predict loa
 ┃ ┣ 🏷️ loantap_logo.png - Logo image for the project
 ┃ ┗ 🧪 model_prototyping.ipynb - Jupyter notebook for exploratory data analysis and model prototyping
 
-┣ 🌐 templates/ - Directory for HTML templates used in web-based applications
-┃ ┗ 🏠 homepage.html - HTML template for the project's homepage
-
 ┣ 🧪 tests/ - Contains unit tests and integration tests to ensure code robustness
 ┃ ┣ 📦 __init__.py - Initialization file for the tests package
 ┃ ┣ 🔍 data_tests.py - Tests for data handling and processing functions
@@ -90,7 +89,6 @@ This project aims to develop an End-to-End machine learning model to predict loa
 ┣ 🚫 .gitignore - File to exclude specific files and directories from Git version control
 ┣ ⚙️ MLProject - Configuration for running MLflow projects
 ┣ 🚀 fastapi_app.py - Script to run a FastAPI web application for serving models or APIs
-┣ 🌐 flask_app.py - Script to run a Flask web application for web-based interfaces
 ┣ 🎨 streamlit_app.py - Script to run a Streamlit application for visualizing data and making predictions
 ┣ 🐋 Dockerfile - Instructions to build a Docker container for the project
 ┣ 🧪 conda.yaml - Environment configuration file for setting up dependencies of MLFlow (not to be used for project setup)
